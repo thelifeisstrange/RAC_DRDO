@@ -95,3 +95,54 @@ tbody tr:hover { background-color: #f1f1f1; }
 .status-match { background-color: #2563eb; } /* Blue for Match */
 .status-mismatch { background-color: #93c5fd; color: #1e3a8a; } /* Light Blue for Mismatch */
 .status-pending { background-color: #e5e7eb; color: #4b5563; } /* Gray for Pending */
+
+/* --- UPDATED STYLES for the job role filter --- */
+
+.filter-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    /* This is the key change to move the content to the right */
+    justify-content: flex-start;
+}
+
+.filter-container label {
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.filter-select {
+    /* Step 1: Hide the default browser appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Step 2: Add our custom arrow SVG as a background */
+    /* This is a simple, URL-encoded chevron-down icon */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+
+    /* Step 3: Position the arrow on the right, inside the box */
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.2em; /* Control the size of the arrow */
+
+    /* Step 4: Add padding to prevent text from overlapping the arrow */
+    padding-right: 3rem !important; /* Make sure there's enough space */
+
+    /* --- Existing styles --- */
+    padding: 0.7rem 1rem;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    font-size: 1rem;
+    min-width: 320px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}

@@ -1,9 +1,11 @@
 // src/pages/ApplicantDashboardPage.js
 import React from 'react';
-import './DashboardPage.css'; // Reuse main dashboard styles
-import './ApplicantDashboard.css'; // Add specific styles
+import './DashboardPage.css';
+import './ApplicantDashboard.css';
+import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
 
 const ApplicantDashboardPage = () => {
+    const { logout } = useAuth(); // Get the logout function from our context
     const applicationStatus = 'Under Review';
     const submittedDocs = [
         { id: 1, name: 'Aadhar_Card_AmitK.pdf', date: '2023-10-26' },
@@ -25,7 +27,8 @@ const ApplicantDashboardPage = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <h1>Applicant Dashboard</h1>
-                <span>RAC Portal</span>
+                {/* --- LOGOUT BUTTON ADDED HERE --- */}
+                <button className="logout-button" onClick={logout}>Logout</button>
             </header>
             <main className="dashboard-main">
                 <div className="applicant-card">
@@ -35,7 +38,6 @@ const ApplicantDashboardPage = () => {
                         <span className={`status-badge ${getStatusClass(applicationStatus)}`}>{applicationStatus}</span>
                     </div>
                 </div>
-
                 <div className="applicant-card">
                     <h3>Submitted Documents</h3>
                     <ul className="doc-list">
@@ -47,7 +49,6 @@ const ApplicantDashboardPage = () => {
                         ))}
                     </ul>
                 </div>
-
                 <div className="applicant-card">
                     <h3>Notifications</h3>
                     <ul className="notification-list">

@@ -26,3 +26,31 @@
     max-width: 1200px;
     margin: 0 auto; /* This centers the block */
 }
+
+/* --- NEW Style for the Logout Button --- */
+.logout-button {
+    background-color: #f8f9fa;
+    border: 1px solid #dcdfe6;
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.logout-button:hover {
+    background-color: #e5e7eb;
+}
+
+/* --- NEW Styles for User Info in Header --- */
+.header-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* Puts some space between the greeting and the logout button */
+}
+
+.header-user-info span {
+    font-weight: 600;
+    color: #4a5568; /* A pleasant, professional text color */
+    font-size: 1rem;
+}

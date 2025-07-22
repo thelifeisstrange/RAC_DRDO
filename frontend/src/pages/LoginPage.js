@@ -1,33 +1,25 @@
 // src/pages/LoginPage.js
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Form.css';
+import { initialUsers } from '../data/mockData';
+import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Screening Member'); // Default role
-  const navigate = useNavigate();
+  const { login } = useAuth(); // Get the login function from our context
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password, role });
+    const foundUser = initialUsers.find(user => user.email === email);
 
-    // REMOVED: The alert message that said "Redirecting..."
-
-    // Navigate based on the selected role
-    switch (role) {
-      case 'Admin':
-        navigate('/admin-dashboard');
-        break;
-      case 'Screening Member':
-        navigate('/dashboard'); // The existing dashboard
-        break;
-      case 'Applicant':
-        navigate('/applicant-dashboard');
-        break;
-      default:
-        navigate('/login');
+    if (foundUser) {
+      // Instead of navigating here, we call the login function from the context.
+      // The context will handle storing the user and navigating.
+      login(foundUser);
+    } else {
+      alert('Invalid email or password. Please try again.');
     }
   };
 
@@ -36,24 +28,16 @@ const LoginPage = () => {
         <div className="form-card">
           <div className="form-header">
             <h2>Welcome Back</h2>
-            <p>Sign in to the RAC Portal</p>
+            <p>Sign in to the DRDO Portal</p>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="email">Email</label>
-              <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your registered email" required />
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="role">Sign in as</label>
-              <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                <option>Screening Member</option>
-                <option>Applicant</option>
-                <option>Admin</option>
-              </select>
             </div>
             <button type="submit" className="form-button">Sign In</button>
           </form>

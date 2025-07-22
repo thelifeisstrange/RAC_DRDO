@@ -1,178 +1,57 @@
-// src/pages/AdminDashboardPage.js
-import React, { useState, useMemo } from 'react'; // NEW: Import useMemo for performance
+// src/pages/ApplicantDashboardPage.js
+import React from 'react';
 import './DashboardPage.css';
-import './AdminDashboard.css';
-import Modal from '../components/common/Modal';
+import './ApplicantDashboard.css';
+import { useAuth } from '../context/AuthContext';
 
-// Initial mock data - We'll add one more user to make filtering more obvious
-const initialUsers = [
-    { id: 1, name: 'Rohan Sharma', email: 'rohan.s@email.com', role: 'Screening Member' },
-    { id: 2, name: 'Priya Singh', email: 'priya.s@email.com', role: 'Screening Member' },
-    { id: 3, name: 'Amit Kumar', email: 'amit.k@email.com', role: 'Applicant' },
-    { id: 4, name: 'Archit Yadav', email: 'archit.y@email.com', role: 'Admin' },
-    { id: 5, name: 'Rushan Shaikh', email: 'stanley_1337@meta.org.in', role: 'Admin' },
-];
-const initialRoles = ['Admin', 'Screening Member', 'Applicant'];
+const ApplicantDashboardPage = () => {
+    // --- UPDATED: Get the 'user' object from the context ---
+    const { logout, user } = useAuth();
 
-const AdminDashboardPage = () => {
-    const [users, setUsers] = useState(initialUsers);
-    const [roles, setRoles] = useState(initialRoles);
-    const [isAssignModalOpen, setAssignModalOpen] = useState(false);
-    const [isAddRoleModalOpen, setAddRoleModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [newRoleName, setNewRoleName] = useState('');
-
-    // --- NEW: State for search and filter controls ---
-    const [searchQuery, setSearchQuery] = useState('');
-    const [roleFilter, setRoleFilter] = useState('All');
-
-    // --- NEW: Memoized calculation to filter users based on search and role selection ---
-    // This recalculates only when its dependencies (users, searchQuery, roleFilter) change.
-    const filteredUsers = useMemo(() => {
-        return users.filter(user => {
-            const matchesRole = roleFilter === 'All' || user.role === roleFilter;
-            const matchesSearch = user.email.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesRole && matchesSearch;
-        });
-    }, [users, searchQuery, roleFilter]);
-
-
-    const handleOpenAssignModal = (user) => {
-        setSelectedUser(user);
-        setAssignModalOpen(true);
-    };
-
-    const handleAssignRole = (newRole) => {
-        setUsers(users.map(user =>
-            user.id === selectedUser.id ? { ...user, role: newRole } : user
-        ));
-        setAssignModalOpen(false);
-    };
-
-    const handleOpenAddRoleModal = () => {
-        setNewRoleName('');
-        setAddRoleModalOpen(true);
-    };
-
-    const handleAddNewRole = () => {
-        if (newRoleName && !roles.includes(newRoleName)) {
-            setRoles([...roles, newRoleName]);
-            setAddRoleModalOpen(false);
-        } else {
-            alert('Please enter a valid, unique role name.');
-        }
-    };
-
-    const getRoleClass = (role) => {
-        const roleKey = role.split(' ')[0].toLowerCase();
-        const validRoles = ['admin', 'screening', 'applicant'];
-        return validRoles.includes(roleKey) ? `role-${roleKey}` : 'role-default';
-    }
+    const applicationStatus = 'Under Review';
+    const submittedDocs = [
+        { id: 1, name: 'Aadhar_Card_AmitK.pdf', date: '2023-10-26' },
+        { id: 2, name: 'PAN_Card_AmitK.pdf', date: '2023-10-26' },
+        { id: 3, name: 'Graduation_Certificate.pdf', date: '2023-10-26' },
+    ];
+    const notifications = [
+        { id: 1, text: 'Your application has been successfully submitted.', read: true },
+        { id: 2, text: 'A screening member has begun reviewing your documents.', read: false },
+    ];
+    const getStatusClass = (status) => { if (status === 'Under Review') return 'status-review'; if (status === 'Approved') return 'status-approved'; return 'status-default'; }
 
     return (
-        <>
-            <div className="dashboard-container">
-                <header className="dashboard-header">
-                    <h1>Admin Dashboard</h1>
-                    <span>RAC Portal</span>
-                </header>
-                <main className="dashboard-main">
-                    <div className="admin-card">
-                        <h3>User Management</h3>
-                        <p>View and manage user roles within the system.</p>
-
-                        {/* --- NEW: Search and Filter Controls Section --- */}
-                        <div className="controls-container">
-                            <input
-                                type="text"
-                                placeholder="Search by user email..."
-                                className="search-input"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <select
-                                className="filter-select"
-                                value={roleFilter}
-                                onChange={(e) => setRoleFilter(e.target.value)}
-                            >
-                                <option value="All">All Roles</option>
-                                {roles.map(role => (
-                                    <option key={role} value={role}>{role}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <table className="user-table">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Current Role</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {/* --- NEW: We now map over 'filteredUsers' instead of the full 'users' list --- */}
-                            {filteredUsers.length > 0 ? (
-                                filteredUsers.map(user => (
-                                    <tr key={user.id}>
-                                        <td>{user.name}</td>
-                                        <td>{user.email}</td>
-                                        <td><span className={`role-pill ${getRoleClass(user.role)}`}>{user.role}</span></td>
-                                        <td><button className="action-button" onClick={() => handleOpenAssignModal(user)}>Assign Role</button></td>
-                                    </tr>
-                                ))
-                            ) : (
-                                // --- NEW: A helpful message to show when no users match the criteria ---
-                                <tr>
-                                    <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#6a737d' }}>
-                                        No users found matching your criteria.
-                                    </td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="admin-card">
-                        <h3>Role Management</h3>
-                        <p>Define new roles and their permissions.</p>
-                        <button className="create-role-button" onClick={handleOpenAddRoleModal}>+ Add New Role</button>
-                    </div>
-                </main>
-            </div>
-
-            {/* --- Modals (No changes needed here) --- */}
-            <Modal title="Assign Role" isOpen={isAssignModalOpen} onClose={() => setAssignModalOpen(false)}>
-                {selectedUser && (
-                    <div>
-                        <p>Assign a new role to <strong>{selectedUser.name}</strong>.</p>
-                        <select
-                            className="form-group"
-                            style={{ width: '100%', padding: '0.8rem', border: '1px solid #dcdfe6', borderRadius: '6px' }}
-                            defaultValue={selectedUser.role}
-                            onChange={(e) => handleAssignRole(e.target.value)}
-                        >
-                            {roles.map(role => <option key={role} value={role}>{role}</option>)}
-                        </select>
-                    </div>
-                )}
-            </Modal>
-            <Modal title="Add New Role" isOpen={isAddRoleModalOpen} onClose={() => setAddRoleModalOpen(false)}>
-                <div className="form-group">
-                    <label htmlFor="newRole">Role Name</label>
-                    <input
-                        type="text"
-                        id="newRole"
-                        value={newRoleName}
-                        onChange={(e) => setNewRoleName(e.target.value)}
-                        placeholder="e.g., Document Verifier"
-                        style={{ width: '100%', padding: '0.8rem', border: '1px solid #dcdfe6', borderRadius: '6px' }}
-                    />
+        <div className="dashboard-container">
+            <header className="dashboard-header">
+                <h1>Applicant Dashboard</h1>
+                {/* --- UPDATED HEADER --- */}
+                <div className="header-user-info">
+                    <span>Hi, {user ? user.name.split(' ')[0] : 'Applicant'}</span>
+                    <button className="logout-button" onClick={logout}>Logout</button>
                 </div>
-                <button className="form-button" onClick={handleAddNewRole}>Create Role</button>
-            </Modal>
-        </>
+            </header>
+            <main className="dashboard-main">
+                <div className="applicant-card">
+                    <h3>Application Overview</h3>
+                    <div className="status-container">
+                        <span>Your current application status is:</span>
+                        <span className={`status-badge ${getStatusClass(applicationStatus)}`}>{applicationStatus}</span>
+                    </div>
+                </div>
+                <div className="applicant-card">
+                    <h3>Submitted Documents</h3>
+                    <ul className="doc-list">
+                        {submittedDocs.map(doc => (<li key={doc.id}><span className="doc-name">{doc.name}</span><span className="doc-date">Submitted on {doc.date}</span></li>))}
+                    </ul>
+                </div>
+                <div className="applicant-card">
+                    <h3>Notifications</h3>
+                    <ul className="notification-list">
+                        {notifications.map(notif => (<li key={notif.id} className={notif.read ? 'read' : 'unread'}>{notif.text}</li>))}
+                    </ul>
+                </div>
+            </main>
+        </div>
     );
 };
-
-export default AdminDashboardPage;
+export default ApplicantDashboardPage;
