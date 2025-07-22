@@ -1,0 +1,113 @@
+/* src/pages/AdminDashboard.css */
+.admin-card {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.admin-card h3 {
+    margin-top: 0;
+    color: #1c2a48;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.admin-card p {
+    color: #6a737d;
+    font-size: 0.95rem;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.user-table th, .user-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.user-table th {
+    background-color: #f7f9fc;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.action-button {
+    background-color: #f0f5ff;
+    color: #3b82f6;
+    border: 1px solid #a3bffa;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: #e0eaff;
+}
+
+.role-pill {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+    display: inline-block;
+}
+.role-admin { background-color: #2563eb; } /* Blue for Admin */
+.role-screening { background-color: #60a5fa; } /* Lighter Blue for Screening */
+.role-applicant { background-color: #93c5fd; color: #1e3a8a } /* Lightest Blue for Applicant */
+.role-default { background-color: #e5e7eb; color: #4b5563; } /* Gray for others */
+
+
+.create-role-button {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.1s;
+}
+.create-role-button:hover {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+}
+.controls-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-input,
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input {
+    flex-grow: 1; /* Allows the search bar to take up available space */
+}
+
+.search-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6; /* A nice blue for focus state */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.filter-select {
+    min-width: 200px; /* Gives the filter a decent default width */
+}

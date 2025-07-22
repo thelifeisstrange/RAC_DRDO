@@ -1,0 +1,97 @@
+/* src/components/dashboard/Dashboard.css */
+.card {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #1c2a48;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.uploader-area {
+    border: 2px dashed #dcdfe6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    background-color: #f7f9fc;
+}
+
+.uploader-area label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #333;
+}
+
+.file-input-wrapper {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.document-uploader {
+    margin-top: 1.5rem;
+}
+
+.upload-label {
+    background-color: #60a5fa;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.upload-label:hover {
+    background-color: #3b82f6;
+}
+
+.file-name {
+    margin-left: 1rem;
+    color: #555;
+    font-style: italic;
+}
+
+.upload-button {
+    width: 100%;
+    padding: 0.9rem;
+    margin-top: 1.5rem;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.upload-button:hover {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+}
+
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+th { background-color: #f8f9fa; font-weight: 600; }
+tbody tr:hover { background-color: #f1f1f1; }
+
+.file-list { margin-top: 1rem; text-align: left; font-size: 0.9rem; max-height: 150px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 1rem; }
+.file-list ul { list-style-type: none; padding-left: 0; margin: 0.5rem 0 0 0; }
+.file-list li { padding: 4px 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 4px; }
+
+.status-pill { padding: 5px 12px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: bold; }
+.status-match { background-color: #2563eb; } /* Blue for Match */
+.status-mismatch { background-color: #93c5fd; color: #1e3a8a; } /* Light Blue for Mismatch */
+.status-pending { background-color: #e5e7eb; color: #4b5563; } /* Gray for Pending */

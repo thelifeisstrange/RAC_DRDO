@@ -1,0 +1,28 @@
+/* src/pages/DashboardPage.css */
+.dashboard-container {
+    background-color: #f7f9fc;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background-color: #ffffff;
+    color: #1c2a48;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* This is the key change to center the content */
+.dashboard-main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto; /* This centers the block */
+}
