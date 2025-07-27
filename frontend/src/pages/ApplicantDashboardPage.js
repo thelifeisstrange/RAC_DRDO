@@ -2,10 +2,12 @@
 import React from 'react';
 import './DashboardPage.css';
 import './ApplicantDashboard.css';
-import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
+import { useAuth } from '../context/AuthContext'; // Make sure this import is here
 
 const ApplicantDashboardPage = () => {
-    const { logout } = useAuth(); // Get the logout function from our context
+    const { logout, user } = useAuth(); // Get the user object from the context
+
+    // (The rest of your component's data and functions remain the same)
     const applicationStatus = 'Under Review';
     const submittedDocs = [
         { id: 1, name: 'Aadhar_Card_AmitK.pdf', date: '2023-10-26' },
@@ -16,7 +18,6 @@ const ApplicantDashboardPage = () => {
         { id: 1, text: 'Your application has been successfully submitted.', read: true },
         { id: 2, text: 'A screening member has begun reviewing your documents.', read: false },
     ];
-
     const getStatusClass = (status) => {
         if (status === 'Under Review') return 'status-review';
         if (status === 'Approved') return 'status-approved';
@@ -27,8 +28,14 @@ const ApplicantDashboardPage = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <h1>Applicant Dashboard</h1>
-                {/* --- LOGOUT BUTTON ADDED HERE --- */}
-                <button className="logout-button" onClick={logout}>Logout</button>
+                <div className="header-user-info">
+
+                    {/* --- THIS IS THE CORRECTED LINE --- */}
+                    {/* It now prefers first_name, but falls back to the email/username if needed */}
+                    <span>Hi, {user ? (user.first_name || user.username) : 'Applicant'}</span>
+
+                    <button className="logout-button" onClick={logout}>Logout</button>
+                </div>
             </header>
             <main className="dashboard-main">
                 <div className="applicant-card">
@@ -63,5 +70,4 @@ const ApplicantDashboardPage = () => {
         </div>
     );
 };
-
 export default ApplicantDashboardPage;

@@ -1,51 +1,65 @@
 // src/context/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
+const API_URL = 'http://localhost:8000/api/';
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    // NEW: Add a loading state. It starts as true.
+    const [user, setUser] = useState(() => {
+        const token = localStorage.getItem('drdo-authTokens');
+        return token ? JSON.parse(atob(token.split('.')[1])) : null;
+    });
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
-    // This useEffect will now also manage the loading state.
-    useEffect(() => {
+    const login = async (email, password) => {
         try {
-            const storedUser = localStorage.getItem('drdo-user');
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
+            const response = await axios.post(API_URL + 'token/', {
+                username: email,
+                password: password,
+            });
+
+            if (response.status === 200) {
+                const data = response.data;
+                const decodedUser = JSON.parse(atob(data.access.split('.')[1]));
+
+                setUser(decodedUser);
+                localStorage.setItem('drdo-authTokens', JSON.stringify(data));
+
+                // --- THIS IS THE FINAL, ROBUST NAVIGATION LOGIC ---
+                // We read the role directly from the token payload.
+                switch (decodedUser.role) {
+                    case 'ADMIN':
+                        navigate('/admin-dashboard');
+                        break;
+                    case 'SCREENING_MEMBER':
+                        navigate('/dashboard');
+                        break;
+                    case 'APPLICANT':
+                        navigate('/applicant-dashboard');
+                        break;
+                    default:
+                        navigate('/login');
+                }
             }
         } catch (error) {
-            console.error("Failed to parse user from localStorage", error);
-            // If data is corrupted, clear it.
-            localStorage.removeItem('drdo-user');
-        } finally {
-            // CRUCIAL: Set loading to false after we've checked localStorage,
-            // regardless of whether a user was found or not.
-            setIsLoading(false);
-        }
-    }, []);
-
-    const login = (userData) => {
-        setUser(userData);
-        localStorage.setItem('drdo-user', JSON.stringify(userData));
-        switch (userData.role) {
-            case 'Admin': navigate('/admin-dashboard'); break;
-            case 'Screening Member': navigate('/dashboard'); break;
-            case 'Applicant': navigate('/applicant-dashboard'); break;
-            default: navigate('/login');
+            console.error("Login Error:", error);
+            alert("Something went wrong! Check credentials.");
         }
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('drdo-user');
+        localStorage.removeItem('drdo-authTokens');
         navigate('/login');
     };
 
-    // UPDATED: Provide the isLoading state to the rest of the app.
+    useEffect(() => {
+        setIsLoading(false);
+    }, []);
+
     const value = {
         isAuthenticated: !!user,
         user,
@@ -56,7 +70,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {children}
+            {isLoading ? null : children}
         </AuthContext.Provider>
     );
 };

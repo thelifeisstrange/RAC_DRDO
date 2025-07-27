@@ -3,9 +3,10 @@ import React, { useState, useMemo } from 'react';
 import FileUploader from '../components/dashboard/FileUploader';
 import ResultsTable from '../components/dashboard/ResultsTable';
 import './DashboardPage.css';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext'; // Make sure this import is here
 
 const mockVerificationData = [
+    // ... your mock data ...
     { id: 1, applicantName: 'Rohan Sharma', documentType: 'Aadhar Card', csvData: 'XXXX XXXX 1234', extractedData: 'XXXX XXXX 1234', status: 'Match', jobAppliedFor: 'Software Engineer' },
     { id: 2, applicantName: 'Priya Singh', documentType: 'PAN Card', csvData: 'ABCDE1234F', extractedData: 'ABCDE1234G', status: 'Mismatch', jobAppliedFor: 'Data Scientist' },
     { id: 3, applicantName: 'Amit Kumar', documentType: 'Aadhar Card', csvData: 'XXXX XXXX 5678', extractedData: 'XXXX XXXX 5678', status: 'Match', jobAppliedFor: 'Software Engineer' },
@@ -16,8 +17,7 @@ const jobRoles = ['All Jobs', ...new Set(mockVerificationData.map(item => item.j
 
 const DashboardPage = () => {
     const [jobFilter, setJobFilter] = useState('All Jobs');
-    // --- UPDATED: Get the 'user' object from the context ---
-    const { logout, user } = useAuth();
+    const { logout, user } = useAuth(); // Get the user object from the context
 
     const filteredData = useMemo(() => {
         if (jobFilter === 'All Jobs') return mockVerificationData;
@@ -28,9 +28,12 @@ const DashboardPage = () => {
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <h1>Screening Dashboard</h1>
-                {/* --- UPDATED HEADER --- */}
                 <div className="header-user-info">
-                    <span>Hi, {user ? user.name.split(' ')[0] : 'User'}</span>
+
+                    {/* --- THIS IS THE CORRECTED LINE --- */}
+                    {/* It now prefers first_name, but falls back to the email/username if needed */}
+                    <span>Hi, {user ? (user.first_name || user.username) : 'User'}</span>
+
                     <button className="logout-button" onClick={logout}>Logout</button>
                 </div>
             </header>

@@ -1,56 +1,53 @@
-/* src/pages/DashboardPage.css */
+/* src/pages/DashboardPage.css - The Shared Layout */
 .dashboard-container {
-    background-color: #f7f9fc;
     min-height: 100vh;
 }
 
 .dashboard-header {
-    background-color: #ffffff;
-    color: #1c2a48;
-    padding: 1rem 2rem;
+    background-color: var(--color-bg-card);
+    padding: 1rem 2.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow);
 }
 
 .dashboard-header h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
-/* This is the key change to center the content */
 .dashboard-main {
-    padding: 2rem;
+    padding: 2.5rem;
     max-width: 1200px;
-    margin: 0 auto; /* This centers the block */
+    margin: 0 auto;
 }
 
-/* --- NEW Style for the Logout Button --- */
-.logout-button {
-    background-color: #f8f9fa;
-    border: 1px solid #dcdfe6;
-    color: #374151;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.logout-button:hover {
-    background-color: #e5e7eb;
-}
-
-/* --- NEW Styles for User Info in Header --- */
 .header-user-info {
     display: flex;
     align-items: center;
-    gap: 1.5rem; /* Puts some space between the greeting and the logout button */
+    gap: 1.5rem;
 }
 
 .header-user-info span {
+    font-weight: 500;
+    color: var(--color-text-body);
+}
+
+.logout-button {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
     font-weight: 600;
-    color: #4a5568; /* A pleasant, professional text color */
-    font-size: 1rem;
+    font-family: var(--font-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.logout-button:hover {
+    background-color: var(--color-bg-main);
+    border-color: #d1d5db;
 }
