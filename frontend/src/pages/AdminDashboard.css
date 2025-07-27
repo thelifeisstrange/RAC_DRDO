@@ -1,0 +1,107 @@
+/* src/pages/AdminDashboard.css - Admin-Specific Styles */
+
+.admin-dashboard-layout {
+    display: flex;
+    /* The header height is approx 65px, this makes the layout fill the rest */
+    min-height: calc(100vh - 65px);
+}
+
+.admin-content-area {
+    flex-grow: 1; /* Takes up all remaining space */
+    padding: 2.5rem;
+    overflow-y: auto; /* Allows scrolling if content is long */
+}
+
+.admin-card {
+    background: var(--color-bg-card);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--color-border);
+    margin-bottom: 2.5rem;
+}
+
+.admin-card h3 {
+    margin-top: 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-card p {
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+}
+
+/* Controls */
+.controls-container {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    align-items: center;
+}
+.search-input, .filter-select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-family: var(--font-primary);
+}
+.search-input { flex-grow: 1; }
+.filter-select { min-width: 200px; }
+
+/* Table */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.user-table th, .user-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+.user-table th {
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+.user-table tr:last-child td { border-bottom: none; }
+
+/* Role Pills */
+.role-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+}
+.role-admin { background-color: var(--color-indigo-bg); color: var(--color-indigo-text); }
+.role-screening-member { background-color: var(--color-blue-bg); color: var(--color-blue-text); }
+.role-applicant { background-color: var(--color-bg-main); color: var(--color-text-muted); }
+
+/* Buttons */
+.action-button, .create-role-button {
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.action-button {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+}
+.action-button:hover { background-color: var(--color-bg-main); }
+.create-role-button { background-color: var(--color-primary); color: white; }
+.create-role-button:hover { background-color: var(--color-primary-hover); }
+
+/* Custom Select Arrow */
+.custom-select {
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1em; padding-right: 2.5rem !important;
+}

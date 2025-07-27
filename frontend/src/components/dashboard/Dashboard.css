@@ -1,0 +1,82 @@
+/* src/components/dashboard/Dashboard.css - Screening-Specific Styles */
+
+/* Cards & Tables (reusing Admin styles for consistency) */
+.card {
+    background: var(--color-bg-card);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--color-border);
+    margin-bottom: 2.5rem;
+}
+.card h3 {
+    margin-top: 0; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border);
+}
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+th { font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); background-color: var(--color-bg-main); }
+tbody tr:hover { background-color: #f9fafb; }
+
+/* Filter Controls (reusing Admin styles) */
+.filter-container {
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: 1rem; margin-bottom: 1.5rem; padding: 1rem;
+    background-color: var(--color-bg-main); border-radius: 0.5rem;
+}
+.filter-container label { font-weight: 500; }
+.filter-select {
+    min-width: 320px; padding: 0.6rem 1rem; border: 1px solid var(--color-border);
+    border-radius: 0.5rem; font-size: 0.9rem; font-family: var(--font-primary);
+}
+
+/* File Uploader */
+.uploader-area {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 2rem; text-align: center; background-color: var(--color-bg-main);
+}
+.uploader-area > label { /* Target the direct child label for better specificity */
+    display: block;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text-dark);
+}
+
+/* --- THIS IS THE NEWLY ADDED AND CORRECTED BLOCK --- */
+.file-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    justify-content: center; /* Center the button and text */
+}
+
+.document-uploader {
+    margin-top: 1.5rem;
+}
+/* --- End of added block --- */
+
+
+.upload-label {
+    background-color: var(--color-bg-card); color: var(--color-text-body);
+    border: 1px solid var(--color-border); padding: 0.6rem 1.25rem; border-radius: 0.5rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.upload-label:hover { border-color: #d1d5db; background-color: var(--color-bg-card); }
+.file-name { margin-left: 1rem; color: var(--color-text-muted); }
+.upload-button {
+    width: 100%; padding: 0.9rem; margin-top: 1.5rem; border: none; border-radius: 0.5rem;
+    background-color: var(--color-primary); color: white; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+}
+.upload-button:hover { background-color: var(--color-primary-hover); }
+
+/* Status Pills */
+.status-pill { padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.75rem; }
+.status-match { background-color: var(--color-green-bg); color: var(--color-green-text); }
+.status-mismatch { background-color: var(--color-red-bg); color: var(--color-red-text); }
+.status-pending { background-color: var(--color-amber-bg); color: var(--color-amber-text); }

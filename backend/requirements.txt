@@ -2,7 +2,12 @@
 
 # Django Core
 django
-django-dotenv
+python-dotenv  # Correct package for load_dotenv
+
+# Django REST Framework & API tools
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
 
 # Data Handling
 pandas
