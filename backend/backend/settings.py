@@ -9,6 +9,19 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+# backend/settings.py
+import os
+from dotenv import load_dotenv
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Now, find the original SECRET_KEY and DEBUG lines and change them to this:
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 from pathlib import Path
 
@@ -37,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "pipeline",  # Ensure pipeline is included
 ]
 
 MIDDLEWARE = [
@@ -121,3 +135,11 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# PIPELINE CONFIGURATION
+TOGETHER_API_KEY = os.getenv('TOGETHER_API_KEY')
+POPPLER_PATH = os.getenv('POPPLER_PATH')
+MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
+SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
+COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
+VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')

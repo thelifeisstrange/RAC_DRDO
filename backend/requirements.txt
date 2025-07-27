@@ -1,0 +1,16 @@
+# requirements.txt
+
+# Django Core
+django
+django-dotenv
+
+# Data Handling
+pandas
+openpyxl
+
+# Image & PDF Processing
+Pillow
+pdf2image
+
+# AI API Client
+together
