@@ -38,19 +38,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Third-party apps for API and authentication
-    'rest_framework',           # <-- ADDED FROM OLD PROJECT
-    'corsheaders',              # <-- ADDED FROM OLD PROJECT
-    'rest_framework_simplejwt', # <-- ADDED FROM OLD PROJECT
-
-    # Your project's applications
-    "pipeline",
-    'users',
-    'api',  # <-- ADDED FROM OLD PROJECT
+    "pipeline", 
+    'rest_framework',      
+    'corsheaders',          
+    'django_celery_results', 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     'corsheaders.middleware.CorsMiddleware', # <-- ADDED FROM OLD PROJECT (Position is important)
@@ -149,6 +144,34 @@ MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
 SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
 COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
 VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')
+
+
+# --- REST FRAMEWORK CONFIG ---
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [], # No auth for now
+    'DEFAULT_PERMISSION_CLASSES': [],     # No permissions for now
+}
+
+# --- CORS CONFIG ---
+# Allow your React app's origin to make requests
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", # The default Vite dev server address
+    "http://127.0.0.1:5173",
+]
+
+# --- CELERY CONFIG ---
+# Use Redis as the message broker
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# Store results in the Django DB
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# --- MEDIA FILES (FOR UPLOADS) ---
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # The address of your React app

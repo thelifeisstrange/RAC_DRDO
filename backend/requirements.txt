@@ -19,3 +19,9 @@ pdf2image
 
 # AI API Client
 together
+
+celery
+redis
+django-celery-results
+django-cors-headers
+djangorestframework
