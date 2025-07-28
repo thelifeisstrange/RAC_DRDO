@@ -1,5 +1,4 @@
 // src/components/dashboard/CompactView.jsx
-
 import React from 'react';
 import StatusPill from './StatusPill';
 import MatchFraction from './MatchFraction';
@@ -19,24 +18,13 @@ const CompactView = ({ data }) => {
         <tbody>
           {data.map(item => (
             <tr key={item.id}>
-              {/* ID Cell */}
               <td className="cell-id">{item.id}</td>
-
-              {/* Candidate Info Cell */}
               <td className="cell-candidate-info">
                 <div className="cell-candidate-name">{item.name.extracted}</div>
                 <div className="cell-candidate-file">{item.sourceFile}</div>
               </td>
-
-              {/* Status Cell */}
-              <td>
-                <StatusPill status={item.status} />
-              </td>
-
-              {/* Match Fraction Cell */}
-              <td>
-                <MatchFraction matches={item.matches} total={item.totalFields} />
-              </td>
+              <td><StatusPill status={item.status} /></td>
+              <td><MatchFraction matches={item.matches} total={item.totalFields} /></td>
             </tr>
           ))}
         </tbody>

@@ -1,1 +1,17 @@
 assets/compressed_documents/
+.idea
+dump.rdb
+
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.iml
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Git-specific files
+.git/
+.gitignore/

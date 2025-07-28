@@ -1,5 +1,11 @@
 # Python
+# Byte-compiled / cached files
 __pycache__/
+*.py[cod]
+*$py.class
+**/migrations/
+!**/migrations/__init__.py
+migrations/
 
 
 # Environment
@@ -12,4 +18,25 @@ venv/
 db.sqlite3
 /media/
 /static/
+db.sqlite3
+db.sqlite3-journal
+
+media/
+dumb.rdb
+
+# Django migrations (if you want to avoid tracking them initially)
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.pyo
+
+# Media and static files (if generated dynamically)
+media/
+staticfiles/
+static/
+uploaded_files/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.iml
 

@@ -1,0 +1,8 @@
+Terminal 1: redis-server
+
+in backend/ env 
+Terminal 2: celery -A backend worker -l info
+Terminal 3: python manage.py runserver
+
+in frontend
+Terminal 4: npm run dev

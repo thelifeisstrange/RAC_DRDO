@@ -1,27 +1,21 @@
-# requirements.txt
+# requirements.txt - Simplified Polling Architecture
 
-# Django Core
+# === Django Core ===
 django
-python-dotenv  # Correct package for load_dotenv
+python-dotenv
 
-# Django REST Framework & API tools
+# === API & Web ===
 djangorestframework
 django-cors-headers
-djangorestframework-simplejwt
 
-# Data Handling
-pandas
-openpyxl
-
-# Image & PDF Processing
-Pillow
-pdf2image
-
-# AI API Client
-together
-
+# === Celery & Results ===
 celery
 redis
 django-celery-results
-django-cors-headers
-djangorestframework
+
+# === Pipeline Worker Dependencies ===
+pandas
+openpyxl
+Pillow
+pdf2image
+together

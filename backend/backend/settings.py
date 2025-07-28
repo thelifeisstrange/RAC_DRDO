@@ -1,179 +1,142 @@
-# backend/settings.py
+# backend/backend/settings.py
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# --- 1. BASE CONFIGURATION & .ENV LOADING ---
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file in the backend directory
+# Load environment variables from .env file in the project's root directory
 load_dotenv(BASE_DIR / '.env')
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# These are now loaded from your .env file
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-dev')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
-# This allows your React frontend to make requests to the Django backend
-CORS_ALLOWED_ORIGINS = [ # <-- ADDED FROM OLD PROJECT
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
 
-# Application definition
-
+# --- 2. APPLICATION DEFINITION ---
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "pipeline", 
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Third-party apps
     'rest_framework',      
     'corsheaders',          
     'django_celery_results', 
+    # Your local apps
+    'pipeline',
 ]
 
 MIDDLEWARE = [
+    # CORS middleware should be as high as possible
     'corsheaders.middleware.CorsMiddleware',
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    'corsheaders.middleware.CorsMiddleware', # <-- ADDED FROM OLD PROJECT (Position is important)
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = "backend.urls"
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "backend.wsgi.application"
+# --- 3. SERVER CONFIGURATION (WSGI for standard requests, ASGI for WebSockets) ---
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# --- 4. DATABASE CONFIGURATION ---
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 
-# Custom User Model
-AUTH_USER_MODEL = 'users.CustomUser' # <-- ADDED FROM OLD PROJECT (Very important!)
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
+# --- 5. PASSWORD VALIDATION ---
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# --- 6. INTERNATIONALIZATION ---
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+# --- 7. STATIC & MEDIA FILES ---
+STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
-STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+# --- 8. MISC DJANGO SETTINGS ---
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Django REST Framework Configuration
-REST_FRAMEWORK = { # <-- ADDED FROM OLD PROJECT
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+# --- 9. THIRD-PARTY APP CONFIGURATION ---
+
+# Django REST Framework (simple setup for now)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [], # No auth for this phase
+    'DEFAULT_PERMISSION_CLASSES': [],     # No permissions for this phase
 }
 
-# PIPELINE CONFIGURATION
+# CORS Headers (Allow React dev server to connect)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", # Default Vite dev server address
+    "http://127.0.0.1:5173",
+]
+
+# --- 10. UNIFIED REAL-TIME CONFIGURATION (CELERY & CHANNELS) ---
+
+# Define the single source of truth for our Redis connection
+REDIS_URL = 'redis://127.0.0.1:6379/0'
+
+# CELERY CONFIGURATION
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = 'django-db' # Store results in the Django database
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+
+# --- 11. CUSTOM PIPELINE CONFIGURATION (Loaded from .env) ---
 TOGETHER_API_KEY = os.getenv('TOGETHER_API_KEY')
 POPPLER_PATH = os.getenv('POPPLER_PATH')
 MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
 SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
 COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
 VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')
-
-
-# --- REST FRAMEWORK CONFIG ---
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [], # No auth for now
-    'DEFAULT_PERMISSION_CLASSES': [],     # No permissions for now
-}
-
-# --- CORS CONFIG ---
-# Allow your React app's origin to make requests
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", # The default Vite dev server address
-    "http://127.0.0.1:5173",
-]
-
-# --- CELERY CONFIG ---
-# Use Redis as the message broker
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-# Store results in the Django DB
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-
-# --- MEDIA FILES (FOR UPLOADS) ---
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # The address of your React app
-    "http://127.0.0.1:5173", # Also add this for good measure
-]
