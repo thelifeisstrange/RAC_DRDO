@@ -2,43 +2,39 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import './DashboardPage.css';
-import './AdminDashboard.css';
+import './AdminDashboardPage.css';
 
+// Import all the components that make up this page
 import Sidebar from '../components/dashboard/Sidebar.jsx';
 import UserManagementView from './UserManagementView.jsx';
-import ScreeningView from './ScreeningView.jsx';
 import RoleManagementView from './RoleManagementView.jsx';
 import Modal from '../components/common/Modal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+// Import your friend's component
+import VerificationCenter from './VerificationCenter.jsx';
 
-// --- A robust way to handle roles ---
-// This list maps the database value to a user-friendly display name.
+// Role options for dropdowns
 const roleOptions = [
     { value: 'ADMIN', label: 'Admin' },
     { value: 'SCREENING_MEMBER', label: 'Screening Member' },
     { value: 'APPLICANT', label: 'Applicant' },
 ];
 
-// Mock data for screening section
-const mockVerificationData = [
-    { id: 1, applicantName: 'Rohan Sharma', documentType: 'Aadhar Card', csvData: 'XXXX XXXX 1234', extractedData: 'XXXX XXXX 1234', status: 'Match', jobAppliedFor: 'Software Engineer' },
-    { id: 2, applicantName: 'Priya Singh', documentType: 'PAN Card', csvData: 'ABCDE1234F', extractedData: 'ABCDE1234G', status: 'Mismatch', jobAppliedFor: 'Data Scientist' },
-];
-const jobRoles = ['All Jobs', ...new Set(mockVerificationData.map(item => item.jobAppliedFor))];
-
 const AdminDashboardPage = () => {
     const { logout, user } = useAuth();
 
     const [activeView, setActiveView] = useState('userManagement');
+
+    // State for User & Role Management
     const [users, setUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
-    const [jobFilter, setJobFilter] = useState('All Jobs');
     const [isAssignModalOpen, setAssignModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [isAddRoleModalOpen, setAddRoleModalOpen] = useState(false);
     const [newRoleName, setNewRoleName] = useState('');
 
+    // --- Data Fetching and Logic for User Management ---
     const fetchUsers = () => {
         const tokens = JSON.parse(localStorage.getItem('drdo-authTokens'));
         if (!tokens) return;
@@ -51,10 +47,13 @@ const AdminDashboardPage = () => {
             .catch(error => console.error("Error fetching users:", error));
     };
 
-    useEffect(() => { fetchUsers(); }, []);
+    useEffect(() => {
+        if (activeView === 'userManagement') {
+            fetchUsers();
+        }
+    }, [activeView]);
 
     const filteredUsers = useMemo(() => users.filter(u => (roleFilter === 'All' || u.role === roleFilter) && u.email.toLowerCase().includes(searchQuery.toLowerCase())), [users, searchQuery, roleFilter]);
-    const filteredVerificationData = useMemo(() => (jobFilter === 'All Jobs' ? mockVerificationData : mockVerificationData.filter(item => item.jobAppliedFor === jobFilter)), [jobFilter]);
 
     const handleAssignRole = async (newRoleValue) => {
         if (!selectedUser) return;
@@ -74,19 +73,14 @@ const AdminDashboardPage = () => {
 
     const handleOpenAssignModal = (userToEdit) => { setSelectedUser(userToEdit); setAssignModalOpen(true); };
     const handleOpenAddRoleModal = () => { setNewRoleName(''); setAddRoleModalOpen(true); };
-    const handleAddNewRole = () => {
-        // This is still a frontend-only simulation.
-        // A real implementation would require a backend endpoint to create roles.
-        const newRoleObject = { value: newRoleName.toUpperCase().replace(' ', '_'), label: newRoleName };
-        roleOptions.push(newRoleObject);
-        setAddRoleModalOpen(false);
-    };
+    const handleAddNewRole = () => { /* Frontend-only simulation */ };
     const getRoleClass = (role) => { if (!role) return 'role-default'; return `role-${role.toLowerCase().replace('_', '-')}`; };
 
+    // --- Helper function to render the correct view ---
     const renderActiveView = () => {
         switch (activeView) {
             case 'screening':
-                return <ScreeningView filteredVerificationData={filteredVerificationData} jobFilter={jobFilter} setJobFilter={setJobFilter} jobRoles={jobRoles} />;
+                return <VerificationCenter />;
             case 'roleManagement':
                 return <RoleManagementView handleOpenAddRoleModal={handleOpenAddRoleModal} />;
             case 'userManagement':
@@ -98,10 +92,18 @@ const AdminDashboardPage = () => {
     return (
         <>
             <div className="dashboard-container">
-                <header className="dashboard-header"><h1>Admin Dashboard</h1><div className="header-user-info"><span>Hi, {user ? user.first_name : 'Admin'}</span><button className="logout-button" onClick={logout}>Logout</button></div></header>
+                <header className="dashboard-header">
+                    <h1>Admin Dashboard</h1>
+                    <div className="header-user-info">
+                        <span>Hi, {user ? user.first_name : 'Admin'}</span>
+                        <button className="logout-button" onClick={logout}>Logout</button>
+                    </div>
+                </header>
                 <div className="admin-dashboard-layout">
                     <Sidebar activeView={activeView} setActiveView={setActiveView} />
-                    <main className="admin-content-area">{renderActiveView()}</main>
+                    <main className="admin-content-area">
+                        {renderActiveView()}
+                    </main> {/* <-- THE FIX IS HERE */}
                 </div>
             </div>
 
@@ -135,4 +137,5 @@ const AdminDashboardPage = () => {
         </>
     );
 };
+
 export default AdminDashboardPage;

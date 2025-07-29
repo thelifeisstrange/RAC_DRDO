@@ -1,8 +1,14 @@
 // src/pages/UserManagementView.jsx
 import React from 'react';
 
-const UserManagementView = ({ filteredUsers, searchQuery, setSearchQuery, roleFilter, setRoleFilter, roles, getRoleClass, handleOpenAssignModal }) => {
+const UserManagementView = ({
+                                filteredUsers, searchQuery, setSearchQuery,
+                                roleFilter, setRoleFilter, roles,
+                                getRoleClass, handleOpenAssignModal
+                            }) => {
     return (
+        // --- THIS IS THE FIX ---
+        // Wrap the entire content in an 'admin-card' div
         <div className="admin-card">
             <h3>User Management</h3>
             <p>View and manage user roles within the system.</p>
@@ -10,15 +16,11 @@ const UserManagementView = ({ filteredUsers, searchQuery, setSearchQuery, roleFi
                 <input type="text" placeholder="Search by user email..." className="search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <select className="filter-select custom-select" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                     <option value="All">All Roles</option>
-
-                    {/* --- THIS IS THE CORRECTED MAPPING --- */}
                     {roles.map(option => (
                         <option key={option.value} value={option.value}>
                             {option.label}
                         </option>
                     ))}
-                    {/* --- End of correction --- */}
-
                 </select>
             </div>
             <table className="user-table">
@@ -39,6 +41,7 @@ const UserManagementView = ({ filteredUsers, searchQuery, setSearchQuery, roleFi
                 </tbody>
             </table>
         </div>
+        // --- End of fix ---
     );
 };
 
