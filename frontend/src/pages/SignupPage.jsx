@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast'; // --- NEW: Import the toast library ---
 import './Form.css';
 
 const SignupPage = () => {
@@ -15,12 +16,14 @@ const SignupPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
-            alert("Passwords do not match!");
+            toast.error("Passwords do not match!"); // --- REPLACED alert() ---
             return;
         }
 
+        // --- NEW: Show a loading toast while the request is happening ---
+        const loadingToastId = toast.loading('Creating your account...');
+
         try {
-            // Send a POST request to our new registration endpoint
             const response = await axios.post('http://localhost:8000/api/register/', {
                 first_name: firstName,
                 last_name: lastName,
@@ -29,19 +32,24 @@ const SignupPage = () => {
                 password2: confirmPassword
             });
 
-            // If registration is successful
             if (response.status === 201) {
-                alert('Signup successful! Please proceed to login.');
-                navigate('/login'); // Redirect to the login page
+                toast.dismiss(loadingToastId); // Dismiss the loading toast on success
+                toast.success('Signup successful! Please proceed to login.'); // --- REPLACED alert() ---
+                navigate('/login');
             }
 
         } catch (error) {
-            console.error("Registration failed:", error.response.data);
-            // Display specific errors from the backend if they exist
-            if (error.response.data.email) {
-                alert(`Error: ${error.response.data.email[0]}`);
-            } else {
-                alert('An error occurred during registration. Please try again.');
+            toast.dismiss(loadingToastId); // Dismiss the loading toast on error
+            console.error("Registration failed:", error.response?.data);
+
+            // --- REPLACED alert() with more specific error toasts ---
+            if (error.response?.data?.email) {
+                toast.error(`Error: ${error.response.data.email[0]}`);
+            } else if (error.response?.data?.password) {
+                toast.error(`Password Error: ${error.response.data.password[0]}`);
+            }
+            else {
+                toast.error('An error occurred. Please try again.');
             }
         }
     };

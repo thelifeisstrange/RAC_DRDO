@@ -31,9 +31,12 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',      
     'corsheaders',          
-    'django_celery_results', 
+    'django_celery_results',
+    'rest_framework_simplejwt',
     # Your local apps
     'pipeline',
+    'users',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +143,10 @@ MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
 SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
 COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
 VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of this apps login method.
+    'users.backends.CustomUserBackend',
+]

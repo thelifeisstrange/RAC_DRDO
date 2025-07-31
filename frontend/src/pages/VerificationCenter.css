@@ -1,19 +1,12 @@
 /* src/pages/VerificationCenter.css */
 
-/*
-  NOTE: Global styles like :root and body.dark have been REMOVED.
-  This component will now correctly inherit its theme from your main index.css file,
-  ensuring a consistent look and feel with the rest of the application.
-  All styles below are "scoped" with .verification-center-wrapper.
-*/
+/* --- NOTE: Inherits global variables from index.css --- */
 
-/* --- BASE LAYOUT (Scoped) --- */
+/* --- BASE LAYOUT --- */
 .verification-center-wrapper .dashboard-content {
   max-width: 1400px;
   margin: 0 auto;
 }
-
-/* --- HEADER (Scoped) --- */
 .verification-center-wrapper .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -29,22 +22,34 @@
   margin: 0;
 }
 
-/* --- VIEW TABS (Scoped) --- */
+/* --- TABS --- */
 .verification-center-wrapper .view-tabs {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   border-bottom: 1px solid var(--color-border);
 }
 .verification-center-wrapper .tab-button {
-  background: none; border: none; padding: 0.75rem 1rem;
-  font-size: 0.875rem; font-weight: 600; color: var(--color-text-muted);
-  cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s ease;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  transform: translateY(1px);
 }
-.verification-center-wrapper .tab-button:hover { color: var(--color-text-heading); }
-.verification-center-wrapper .tab-button.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.verification-center-wrapper .tab-button:hover {
+  color: var(--color-text-heading);
+}
+.verification-center-wrapper .tab-button.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
 
-/* --- UPLOAD WORKFLOW CONTAINER (Scoped) --- */
+/* --- UPLOAD WORKFLOW CONTAINER --- */
 .verification-center-wrapper .upload-workflow {
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -56,67 +61,278 @@
   gap: 2rem;
   align-items: flex-start;
 }
-.verification-center-wrapper .upload-column { display: flex; flex-direction: column; gap: 0.75rem; }
-.verification-center-wrapper .upload-column h2 { font-size: 1.125rem; margin: 0 0 0.5rem 0; }
-.verification-center-wrapper .upload-column p { font-size: 0.875rem; color: var(--color-text-muted); margin: 0; }
-
-/* --- FILE UPLOAD ZONE (Scoped) --- */
-.verification-center-wrapper .file-upload-zone {
-  padding: 2rem 1.5rem; text-align: center; border: 2px dashed var(--color-border);
-  border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease-in-out;
+.verification-center-wrapper .upload-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
-.verification-center-wrapper .file-upload-zone:hover { border-color: var(--color-primary); background-color: var(--color-bg-main); }
-.verification-center-wrapper .file-upload-zone.files-selected { border-color: var(--color-green-text); background-color: var(--color-green-bg); }
-.verification-center-wrapper .file-upload-zone input { display: none; }
-.verification-center-wrapper .upload-icon { margin: 0 auto; height: 2.5rem; width: 2.5rem; color: var(--color-text-muted); }
-.verification-center-wrapper .file-upload-zone.files-selected .upload-icon { color: var(--color-green-text); }
-.verification-center-wrapper .upload-status-text { margin-top: 0.5rem; font-size: 0.875rem; font-weight: 600; color: var(--color-green-text); }
-
-/* --- ACTION AREA (Scoped) --- */
+.verification-center-wrapper .upload-column h2 {
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem 0;
+}
+.verification-center-wrapper .upload-column p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
 .verification-center-wrapper .action-area {
-  grid-column: 1 / -1; display: flex; flex-direction: column;
-  align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
 }
 .verification-center-wrapper .run-pipeline-button {
-  width: 100%; max-width: 400px; padding: 0.75rem 1.5rem; color: white;
-  font-weight: 600; font-size: 1rem; background-color: var(--color-primary);
-  border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease-in-out;
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
-.verification-center-wrapper .run-pipeline-button:hover:not(:disabled) { background-color: var(--color-primary-hover); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.verification-center-wrapper .run-pipeline-button:disabled { background-color: #9ca3af; cursor: not-allowed; opacity: 0.6; }
-.verification-center-wrapper .pipeline-status-message { font-size: 0.875rem; color: var(--color-text-muted); height: 1.25rem; }
+.verification-center-wrapper .run-pipeline-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.verification-center-wrapper .run-pipeline-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.verification-center-wrapper .pipeline-status-message {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  height: 1.25rem;
+}
+
+/* --- FILE UPLOAD ZONE --- */
+.verification-center-wrapper .file-upload-zone {
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px dashed var(--color-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  box-sizing: border-box;
+}
+.verification-center-wrapper .file-upload-zone:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-bg-main);
+}
+.verification-center-wrapper .file-upload-zone.files-selected {
+  border-style: solid;
+  border-color: var(--color-green-text);
+  background-color: var(--color-green-bg);
+}
+.verification-center-wrapper .file-upload-zone input {
+  display: none;
+}
+.verification-center-wrapper .upload-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+}
+.verification-center-wrapper .file-upload-zone.files-selected .upload-icon {
+  color: var(--color-green-text);
+}
+.verification-center-wrapper .upload-prompt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+.verification-center-wrapper .upload-status {
+  text-align: center;
+}
+.verification-center-wrapper .upload-status-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-green-text);
+}
+.verification-center-wrapper .file-list-preview {
+  font-size: 0.8rem;
+  color: var(--color-green-text);
+  margin-top: 0.25rem;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- LOADING STATE --- */
+.verification-center-wrapper .loading-state-container {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 3rem 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 420px;
+  box-sizing: border-box;
+}
+.verification-center-wrapper .progress-circle-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.verification-center-wrapper .progress-text-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.verification-center-wrapper .progress-circle {
+  transform: rotate(-90deg);
+}
+.verification-center-wrapper .progress-circle-bg {
+  fill: none;
+  stroke: var(--color-border);
+}
+.verification-center-wrapper .progress-circle-fg {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+}
+.verification-center-wrapper .progress-fraction {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-heading);
+  line-height: 1;
+}
+.verification-center-wrapper .progress-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.verification-center-wrapper .loading-status-message {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-body);
+}
 
 /* --- RESULTS SECTION --- */
 .verification-center-wrapper .results-section {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  padding: 2rem;
+  padding: 0;
+  overflow: hidden;
+}
+.verification-center-wrapper .results-section nav {
+  padding: 0 2rem;
 }
 
-/* --- SHARED COMPONENTS (Scoped) --- */
-.verification-center-wrapper .status-pill { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-.verification-center-wrapper .status-pill.complete { background: var(--color-green-bg); color: var(--color-green-text); }
-.verification-center-wrapper .status-pill.failed { background: var(--color-red-bg); color: var(--color-red-text); }
-.verification-center-wrapper .match-fraction { display: flex; align-items: center; gap: 0.75rem; }
-.verification-center-wrapper .match-fraction .fraction-text { font-size: 1rem; font-weight: 600; }
-.verification-center-wrapper .progress-ring { transform: rotate(-90deg); }
-.verification-center-wrapper .progress-ring-bg { stroke: var(--color-bg-tertiary); }
-.verification-center-wrapper .progress-ring-fg { stroke: var(--color-primary); transition: stroke-dashoffset 0.5s ease-out; }
-.verification-center-wrapper .cell-id { font-weight: 700; font-size: 1rem; }
-.verification-center-wrapper .cell-file { font-family: monospace; font-size: 0.75rem; color: var(--color-text-muted); }
+/* --- TABLES --- */
+.verification-center-wrapper .overview-table,
+.verification-center-wrapper .compact-table,
+.verification-center-wrapper .detailed-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.verification-center-wrapper .overview-table th,
+.verification-center-wrapper .compact-table th,
+.verification-center-wrapper .detailed-table th {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-main);
+}
+.verification-center-wrapper .overview-table td,
+.verification-center-wrapper .compact-table td,
+.verification-center-wrapper .detailed-table .overview-row td {
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+.verification-center-wrapper .overview-table tr:last-child td,
+.verification-center-wrapper .compact-table tr:last-child td,
+.verification-center-wrapper .detailed-table tr:last-of-type .overview-row td {
+  border-bottom: none;
+}
+.verification-center-wrapper .overview-table th:first-child, .overview-table td:first-child,
+.verification-center-wrapper .compact-table th:first-child, .compact-table td:first-child,
+.verification-center-wrapper .detailed-table th:first-child, .detailed-table td:first-child {
+  padding-left: 2rem;
+}
+.verification-center-wrapper .overview-table th:last-child, .overview-table td:last-child,
+.verification-center-wrapper .compact-table th:last-child, .compact-table td:last-child,
+.verification-center-wrapper .detailed-table th:last-child, .detailed-table td:last-child {
+  padding-right: 2rem;
+  text-align: right;
+}
+.verification-center-wrapper .overview-table td:last-child,
+.verification-center-wrapper .compact-table td:last-child,
+.verification-center-wrapper .detailed-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
 
-/* --- TABLES (Scoped) --- */
-.verification-center-wrapper .overview-table-wrapper, .verification-center-wrapper .compact-table-wrapper, .verification-center-wrapper .detailed-table-wrapper { background: transparent; border: none; border-radius: 0; overflow: visible; }
-.verification-center-wrapper .overview-table, .verification-center-wrapper .compact-table, .verification-center-wrapper .detailed-table { width: 100%; border-collapse: collapse; text-align: left; }
-.verification-center-wrapper .overview-table th, .verification-center-wrapper .compact-table th, .verification-center-wrapper .detailed-table th { padding: 0.75rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-main); }
-.verification-center-wrapper .overview-table td, .verification-center-wrapper .compact-table td, .verification-center-wrapper .detailed-table .overview-row td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--color-border); }
-.verification-center-wrapper .overview-table tr:last-child td, .verification-center-wrapper .compact-table tr:last-child td { border-bottom: none; }
 .verification-center-wrapper .overview-row { cursor: pointer; transition: background-color 0.2s ease-in-out; }
 .verification-center-wrapper .overview-row:hover { background-color: var(--color-bg-main); }
 .verification-center-wrapper .overview-row.expanded { background-color: var(--color-bg-main); }
 .verification-center-wrapper .overview-row.expanded td { border-bottom: 2px solid var(--color-primary); }
 
-/* --- LOADING STATE & DETAIL VIEW (Scoped) --- */
-.verification-center-wrapper .loading-state-container { background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 3rem 2rem; margin-bottom: 2.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 420px; box-sizing: border-box; }
-.verification-center-wrapper .detail-row-content { background-color: var(--color-bg-main); padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+/* --- SHARED COMPONENTS IN TABLES --- */
+.verification-center-wrapper .status-pill { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.verification-center-wrapper .status-pill.complete { background: var(--color-green-bg); color: var(--color-green-text); }
+.verification-center-wrapper .status-pill.failed { background: var(--color-red-bg); color: var(--color-red-text); }
+.verification-center-wrapper .match-fraction { display: flex; align-items: center; gap: 0.75rem; justify-content: flex-start; }
+.verification-center-wrapper .match-fraction .progress-circle-wrapper { width: 32px; height: 32px; }
+.verification-center-wrapper .fraction-text { font-size: 1rem; font-weight: 600; }
+.verification-center-wrapper .cell-id { font-weight: 700; font-size: 1rem; }
+.verification-center-wrapper .cell-file { font-family: monospace; font-size: 0.75rem; color: var(--color-text-muted); }
+.verification-center-wrapper .cell-candidate-info { line-height: 1.4; }
+.verification-center-wrapper .cell-candidate-name { font-weight: 600; color: var(--color-text-heading); }
+
+/* --- EXPANDED DETAIL VIEW --- */
+.verification-center-wrapper .detail-row-container td { padding: 0; }
+.verification-center-wrapper .detail-row-content { background-color: var(--color-bg-main); padding: 2rem 2.5rem; }
+.verification-center-wrapper .cell-toggle-icon { transition: transform 0.3s ease; }
+.verification-center-wrapper .cell-toggle-icon.expanded { transform: rotate(180deg); }
+.verification-center-wrapper .detail-summary { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); text-align: left; }
+.verification-center-wrapper .detail-summary h4 { margin: 0 0 0.5rem 0; font-size: 1.125rem; }
+.verification-center-wrapper .detail-summary p { margin: 0; font-size: 0.9rem; }
+.verification-center-wrapper .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+.verification-center-wrapper .detail-field-item { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.25rem; transition: all 0.2s ease-in-out; border-left: 4px solid transparent; }
+.verification-center-wrapper .detail-field-item.mismatched { border-left-color: var(--color-red-text); background-color: #fff1f2; }
+.verification-center-wrapper .detail-field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.verification-center-wrapper .detail-field-label { font-size: 0.875rem; font-weight: 600; color: var(--color-text-body); text-transform: capitalize; }
+.verification-center-wrapper .detail-field-status svg { width: 1.25rem; height: 1.25rem; }
+.verification-center-wrapper .detail-field-item:not(.mismatched) .detail-field-status { color: var(--color-green-text); }
+.verification-center-wrapper .detail-field-item.mismatched .detail-field-status { color: var(--color-red-text); }
+.verification-center-wrapper .detail-field-values { font-family: monospace; font-size: 0.9rem; line-height: 1.6; }
+.verification-center-wrapper .detail-field-values .value-label { font-weight: 600; color: var(--color-text-muted); }
+.verification-center-wrapper .mismatched-value { color: var(--color-red-text); font-weight: 700; }

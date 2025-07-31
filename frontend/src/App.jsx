@@ -1,14 +1,14 @@
 // src/App.jsx
-// Add this import to src/App.jsx
+
+// This line imports your global stylesheet, which is essential.
 import './index.css';
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Import the global authentication provider
 import { AuthProvider } from './context/AuthContext.jsx';
-
-// Import the component that protects routes
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
+
+// --- NEW: Import the Toaster component for notifications ---
+import { Toaster } from 'react-hot-toast';
 
 // Import all the page components
 import LoginPage from './pages/LoginPage.jsx';
@@ -20,17 +20,41 @@ import ApplicantDashboardPage from './pages/ApplicantDashboardPage.jsx';
 function App() {
   return (
       <Router>
-        {/* AuthProvider wraps the entire app, making authentication state available everywhere */}
         <AuthProvider>
+          {/* --- NEW: Add the Toaster component here --- */}
+          {/* This single component will render all toast notifications from anywhere in your app */}
+          <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 4000, // Toasts last for 4 seconds
+                style: {
+                  background: 'var(--color-text-heading, #111827)', // Use our CSS variable for dark background
+                  color: 'var(--color-bg-card, #ffffff)', // Use our CSS variable for light text
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                },
+                // Style for specific toast types
+                success: {
+                  style: {
+                    background: 'var(--color-green-bg, #d1fae5)',
+                    color: 'var(--color-green-text, #065f46)',
+                  },
+                },
+                error: {
+                  style: {
+                    background: 'var(--color-red-bg, #fee2e2)',
+                    color: 'var(--color-red-text, #991b1b)',
+                  },
+                },
+              }}
+          />
+
           <Routes>
             {/* --- PUBLIC ROUTES --- */}
-            {/* These routes are accessible to anyone */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
 
             {/* --- PROTECTED ROUTES --- */}
-            {/* These routes are only accessible to logged-in users */}
-            {/* The ProtectedRoute component acts as a gatekeeper */}
             <Route
                 path="/dashboard"
                 element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
@@ -45,7 +69,6 @@ function App() {
             />
 
             {/* --- DEFAULT ROUTE --- */}
-            {/* If a user goes to the base URL, redirect them to the login page */}
             <Route path="/" element={<Navigate to="/login" />} />
           </Routes>
         </AuthProvider>
