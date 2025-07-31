@@ -22,6 +22,7 @@ ALLOWED_HOSTS = []
 
 # --- 2. APPLICATION DEFINITION ---
 INSTALLED_APPS = [
+    'corsheaders', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -29,8 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third-party apps
-    'rest_framework',      
-    'corsheaders',          
+    'rest_framework',               
     'django_celery_results',
     'rest_framework_simplejwt',
     # Your local apps
@@ -139,10 +139,10 @@ CELERY_TIMEZONE = 'UTC'
 # --- 11. CUSTOM PIPELINE CONFIGURATION (Loaded from .env) ---
 TOGETHER_API_KEY = os.getenv('TOGETHER_API_KEY')
 POPPLER_PATH = os.getenv('POPPLER_PATH')
-MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
-SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
-COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
-VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')
+# MASTER_CSV_PATH = os.getenv('MASTER_CSV_PATH')
+# SOURCE_FOLDER = os.getenv('SOURCE_FOLDER')
+# COMPRESSED_FOLDER = os.getenv('COMPRESSED_FOLDER')
+# VERIFICATION_EXCEL_PATH = os.getenv('VERIFICATION_EXCEL_PATH')
 
 AUTH_USER_MODEL = 'users.CustomUser'
 

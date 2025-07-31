@@ -1,43 +1,33 @@
 # pipeline/tasks.py
-
 import os
+import shutil
 import pandas as pd
 from celery import shared_task
 from django.conf import settings
-
 from .models import VerificationJob, VerificationResult
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
 from .workers.extract_worker import extract_and_parse, initialize_client
 from .workers.verify_worker import verify_and_create_row
 
-# The task now only accepts the job_id, making it more robust.
 @shared_task
 def run_verification_pipeline(job_id):
     job = VerificationJob.objects.get(id=job_id)
     job.status = 'PROCESSING'
     job.save()
 
+    temp_compress_dir = os.path.join(settings.MEDIA_ROOT, 'temp_compress', str(job_id))
+    os.makedirs(temp_compress_dir, exist_ok=True)
+
     try:
-        # --- NEW LOGIC: The task is now self-sufficient ---
-        # It finds its own files based on the job ID.
+        # ... (logic to find master_csv_path and source_file_paths) ...
         upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', str(job_id))
-        
-        # Find the master CSV file in the job's directory.
         master_csv_paths = [os.path.join(upload_dir, f) for f in os.listdir(upload_dir) if f.lower().endswith('.csv')]
-        if not master_csv_paths:
-            raise Exception(f"Fatal: No master CSV file found in job directory {upload_dir}")
+        if not master_csv_paths: raise Exception(f"Fatal: No master CSV file found in job directory {upload_dir}")
         master_csv_path = master_csv_paths[0]
+        source_file_paths = [os.path.join(upload_dir, f) for f in os.listdir(upload_dir) if f.lower().endswith(('.pdf', '.png', '.jpg', '.jpeg', '.webp'))]
+        if not source_file_paths: raise Exception(f"Fatal: No source documents found in job directory {upload_dir}")
 
-        # Find all source documents (images/PDFs) in the directory.
-        source_file_paths = [
-            os.path.join(upload_dir, f) for f in os.listdir(upload_dir) 
-            if f.lower().endswith(('.pdf', '.png', '.jpg', '.jpeg', '.webp'))
-        ]
-        if not source_file_paths:
-            raise Exception(f"Fatal: No source documents found in job directory {upload_dir}")
-
-        # --- The rest of the pipeline logic is the same ---
         initialize_client()
         master_df = load_and_prepare_csv(master_csv_path)
         if master_df is None:
@@ -51,7 +41,7 @@ def run_verification_pipeline(job_id):
             print(f"[CELERY TASK] Processing file: {os.path.basename(file_path)}")
             
             file_name = os.path.basename(file_path)
-            compressed_path, _ = process_and_compress(file_path, settings.COMPRESSED_FOLDER, poppler_path=settings.POPPLER_PATH)
+            compressed_path, _ = process_and_compress(file_path, temp_compress_dir, poppler_path=settings.POPPLER_PATH)
             
             if not compressed_path:
                 result_row_list = [file_name.split('_')[0], 'N/A', 'N/A', 'N/A', 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 6)
@@ -61,8 +51,14 @@ def run_verification_pipeline(job_id):
             
             result_dict = dict(zip(final_headers, result_row_list))
 
-            # Save the result for this single file to the database.
-            VerificationResult.objects.create(job=job, data=result_dict)
+            # --- START OF THE ROBUST FIX ---
+            # Sanitize the dictionary to ensure all values are JSON-serializable strings.
+            # This converts any potential `nan` or other non-JSON types.
+            sanitized_dict = {key: str(value) for key, value in result_dict.items()}
+            # --- END OF THE ROBUST FIX ---
+
+            # Save the sanitized dictionary to the database.
+            VerificationResult.objects.create(job=job, data=sanitized_dict)
             print(f"[CELERY TASK] Saved result for {file_name} to the database.")
             
             processed_count += 1
@@ -75,5 +71,9 @@ def run_verification_pipeline(job_id):
         job.status = 'FAILED'
         job.details = f"An error occurred: {e}"
         job.save()
-        # It's good practice to re-raise the exception so Celery knows the task failed
         raise e
+    
+    finally:
+        if os.path.exists(temp_compress_dir):
+            print(f"[CELERY TASK] Cleaning up temporary directory: {temp_compress_dir}")
+            shutil.rmtree(temp_compress_dir)

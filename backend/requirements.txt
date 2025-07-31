@@ -7,6 +7,7 @@ python-dotenv
 # === API & Web ===
 djangorestframework
 django-cors-headers
+djangorestframework-simplejwt
 
 # === Celery & Results ===
 celery
