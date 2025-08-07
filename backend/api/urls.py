@@ -4,7 +4,9 @@ from .views import (
     UserListView,
     UserDetailView,
     RegisterView,
-    custom_login_view # Import our new login view
+    custom_login_view,
+    RoleListView,     # Add this import
+    RoleDetailView    # Add this import
 )
 
 urlpatterns = [
@@ -14,4 +16,6 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('users/', UserListView.as_view(), name='user-list'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('roles/', RoleListView.as_view(), name='role-list-create'),
+    path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-delete'),
 ]

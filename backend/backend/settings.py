@@ -22,17 +22,19 @@ ALLOWED_HOSTS = []
 
 # --- 2. APPLICATION DEFINITION ---
 INSTALLED_APPS = [
-    'corsheaders', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party apps
-    'rest_framework',               
+
+    # 3rd Party Apps
+    'rest_framework',
+    'corsheaders', # Moved here for clarity, still high up
     'django_celery_results',
     'rest_framework_simplejwt',
+
     # Your local apps
     'pipeline',
     'users',
@@ -117,9 +119,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django REST Framework (simple setup for now)
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # This tells all DRF views to use our custom logic to find the user
-        'api.authentication.CustomJWTAuthentication',
-    )
+        # This is the standard, correct setting from the library
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        # This is a good default to make most endpoints secure
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 # CORS Headers (Allow React dev server to connect)

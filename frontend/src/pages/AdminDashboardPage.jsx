@@ -1,4 +1,3 @@
-// src/pages/AdminDashboardPage.jsx
 import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,79 +8,81 @@ import Sidebar from '../components/dashboard/Sidebar.jsx';
 import UserManagementView from './UserManagementView.jsx';
 import RoleManagementView from './RoleManagementView.jsx';
 import VerificationCenter from './VerificationCenter.jsx';
-import Modal from '../components/common/Modal.jsx';
+import Modal from '../components/common/Modal.jsx'; // Assuming a generic modal exists here
 import { useAuth } from '../context/AuthContext.jsx';
-
-const initialRoleOptions = [
-    { value: 'ADMIN', label: 'Admin' },
-    { value: 'SCREENING_MEMBER', label: 'Screening Member' },
-    { value: 'APPLICANT', label: 'Applicant' },
-];
 
 const AdminDashboardPage = () => {
     const { logout, user, authTokens } = useAuth();
 
+    // Core Data State
     const [activeView, setActiveView] = useState('userManagement');
     const [users, setUsers] = useState([]);
-    const [currentRoleOptions, setCurrentRoleOptions] = useState(initialRoleOptions);
+    const [roles, setRoles] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Filter and Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isAssignModalOpen, setAssignModalOpen] = useState(false);
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [isAddRoleModalOpen, setAddRoleModalOpen] = useState(false);
-    const [newRoleName, setNewRoleName] = useState('');
-    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
 
-    const fetchUsers = async () => {
-        setIsLoadingUsers(true);
+    // Modal and Selection State
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [roleToDelete, setRoleToDelete] = useState(null);
+    const [isAssignModalOpen, setAssignModalOpen] = useState(false);
+    const [isDeleteUserModalOpen, setDeleteUserModalOpen] = useState(false);
+    const [isAddRoleModalOpen, setAddRoleModalOpen] = useState(false);
+    const [newRole, setNewRole] = useState({
+        name: '',
+        can_manage_users: false,
+        can_screen_applications: false,
+        can_manage_roles: false,
+    });
+
+    const fetchData = async () => {
+        setIsLoading(true);
         if (!authTokens) {
-            setIsLoadingUsers(false);
+            setIsLoading(false);
             return;
         }
+        const config = { headers: { 'Authorization': `Bearer ${authTokens.access}` } };
         try {
-            const config = { headers: { 'Authorization': `Bearer ${authTokens.access}` } };
-            const response = await axios.get('http://localhost:8000/api/users/', config);
-            const formattedUsers = response.data.map(u => ({ id: u.id, name: u.first_name || u.email, email: u.email, role: u.role }));
-            setUsers(formattedUsers);
+            const [usersRes, rolesRes] = await Promise.all([
+                axios.get('http://localhost:8000/api/users/', config),
+                axios.get('http://localhost:8000/api/roles/', config)
+            ]);
+            setUsers(usersRes.data.map(u => ({ ...u, name: u.first_name || u.email })));
+            setRoles(rolesRes.data);
         } catch (error) {
-            console.error("Error fetching users:", error);
-            toast.error("Could not load user data.");
+            toast.error("Could not load initial dashboard data.");
         } finally {
-            setIsLoadingUsers(false);
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        if (activeView === 'userManagement') {
-            fetchUsers();
-        }
-    }, [activeView, authTokens]);
+        fetchData();
+    }, [authTokens]);
 
-    const filteredUsers = useMemo(() => users.filter(u => (roleFilter === 'All' || u.role === roleFilter) && u.email.toLowerCase().includes(searchQuery.toLowerCase())), [users, searchQuery, roleFilter]);
+    const filteredUsers = useMemo(() => {
+        return users.filter(u =>
+            (roleFilter === 'All' || u.role?.name === roleFilter) &&
+            u.email.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [users, searchQuery, roleFilter]);
 
-    const handleAssignRole = async (newRoleValue) => {
+    const handleAssignRole = async (roleId) => {
         if (!selectedUser || !authTokens) return;
-
-        const loadingToastId = toast.loading('Updating role...');
-        const config = { headers: { 'Authorization': `Bearer ${authTokens.access}` } };
-        const updatedData = { role: newRoleValue };
-
+        const roleName = roleId ? roles.find(r => r.id === parseInt(roleId))?.name.replace(/_/g, ' ') : 'No Role';
+        const loadingToastId = toast.loading(`Assigning role to ${selectedUser.name}...`);
+        const config = { headers: { 'Authorization': 'Bearer ' + authTokens.access } };
         try {
-            await axios.patch(`http://localhost:8000/api/users/${selectedUser.id}/`, updatedData, config);
-
+            await axios.patch(`http://localhost:8000/api/users/${selectedUser.id}/`, { role: roleId || null }, config);
             toast.dismiss(loadingToastId);
-            toast.success('Role updated successfully!');
-
-            // Manually update the local state for an instant UI change.
-            setUsers(currentUsers => currentUsers.map(u =>
-                u.id === selectedUser.id ? { ...u, role: newRoleValue } : u
-            ));
-
+            toast.success(`Role "${roleName}" assigned to ${selectedUser.name} successfully!`);
+            await fetchData();
             setAssignModalOpen(false);
         } catch (error) {
             toast.dismiss(loadingToastId);
-            toast.error("An error occurred while updating the role.");
+            toast.error(`Failed to assign role to ${selectedUser.name}.`);
         }
     };
 
@@ -89,65 +90,116 @@ const AdminDashboardPage = () => {
         if (!selectedUser || !authTokens) return;
         if (selectedUser.id === user.user_id) {
             toast.error("You cannot delete your own account.");
-            setDeleteModalOpen(false);
+            setDeleteUserModalOpen(false);
             return;
         }
-        const loadingToastId = toast.loading('Deleting user...');
+        const loadingToastId = toast.loading(`Deleting user ${selectedUser.name}...`);
         const config = { headers: { 'Authorization': `Bearer ${authTokens.access}` } };
         try {
             await axios.delete(`http://localhost:8000/api/users/${selectedUser.id}/`, config);
             toast.dismiss(loadingToastId);
-            toast.success('User deleted successfully!');
-            // Manually remove the user from local state for an instant UI change.
-            setUsers(currentUsers => currentUsers.filter(u => u.id !== selectedUser.id));
-            setDeleteModalOpen(false);
+            toast.success(`User ${selectedUser.name} deleted successfully!`);
+            await fetchData();
+            setDeleteUserModalOpen(false);
         } catch (error) {
             toast.dismiss(loadingToastId);
-            toast.error("Failed to delete user.");
+            toast.error(`Failed to delete user ${selectedUser.name}.`);
         }
     };
 
-    const handleOpenAssignModal = (userToEdit) => { setSelectedUser(userToEdit); setAssignModalOpen(true); };
-    const handleOpenDeleteModal = (userToDelete) => { setSelectedUser(userToDelete); setDeleteModalOpen(true); };
-    const handleOpenAddRoleModal = () => { setNewRoleName(''); setAddRoleModalOpen(true); };
-    const handleAddNewRole = () => {
-        if (!newRoleName.trim()) {
-            toast.error('Please enter a role name.');
-            return;
+    const handleAddNewRole = async () => {
+        const trimmedName = newRole.name.trim();
+        if (!trimmedName) return toast.error("Role name cannot be empty.");
+        if (!authTokens) return toast.error("Authentication error. Please log in again.");
+
+        const roleValue = trimmedName.toUpperCase().replace(/\s+/g, '_');
+        if (roles.some(r => r.name === roleValue)) {
+            return toast.error(`A role named "${trimmedName}" already exists.`);
         }
-        const newRoleValue = newRoleName.trim().toUpperCase().replace(/\s+/g, '_');
-        const newRole = { value: newRoleValue, label: newRoleName.trim() };
-        if (currentRoleOptions.some(option => option.value === newRole.value)) {
-            toast.error(`Role "${newRole.label}" already exists.`);
-            return;
+        const loadingToastId = toast.loading(`Creating role "${trimmedName}"...`);
+        const config = { headers: { 'Authorization': 'Bearer ' + authTokens.access } };
+        const dataToSend = {
+            name: roleValue,
+            can_manage_users: newRole.can_manage_users,
+            can_screen_applications: newRole.can_screen_applications,
+            can_manage_roles: newRole.can_manage_roles
+        };
+        try {
+            await axios.post('http://localhost:8000/api/roles/', dataToSend, config);
+            toast.dismiss(loadingToastId);
+            toast.success(`Role "${trimmedName}" created successfully!`);
+            await fetchData();
+            setAddRoleModalOpen(false);
+        } catch (error) {
+            toast.dismiss(loadingToastId);
+            toast.error(`Failed to create role "${trimmedName}".`);
         }
-        setCurrentRoleOptions(prevOptions => [...prevOptions, newRole]);
-        toast.success(`Role "${newRole.label}" added for this session.`);
-        setNewRoleName('');
-        setAddRoleModalOpen(false);
     };
 
-    const getRoleClass = (role) => { if (!role) return 'role-default'; return `role-${role.toLowerCase().replace('_', '-')}`; };
+    const handleDeleteRole = async () => {
+        if (!roleToDelete) return;
+        const prettyRoleName = roleToDelete.name.replace(/_/g, ' ');
+        const loadingToastId = toast.loading(`Deleting role "${prettyRoleName}"...`);
+        const config = { headers: { 'Authorization': `Bearer ${authTokens.access}` } };
+        try {
+            await axios.delete(`http://localhost:8000/api/roles/${roleToDelete.id}/`, config);
+            toast.dismiss(loadingToastId);
+            toast.success(`Role "${prettyRoleName}" deleted successfully!`);
+            await fetchData();
+            setRoleToDelete(null); // Close modal
+        } catch (err) {
+            toast.dismiss(loadingToastId);
+            toast.error(`Failed to delete role "${prettyRoleName}".`);
+        }
+    };
+
+    const handleOpenAssignModal = (userToEdit) => {
+        setSelectedUser(userToEdit);
+        setAssignModalOpen(true);
+    };
+
+    const handleOpenDeleteUserModal = (userToDelete) => {
+        setSelectedUser(userToDelete);
+        setDeleteUserModalOpen(true);
+    };
+
+    const handleOpenDeleteRoleModal = (role) => {
+        setRoleToDelete(role);
+    };
+
+    const handleOpenAddRoleModal = () => {
+        setNewRole({ name: '', can_manage_users: false, can_screen_applications: false, can_manage_roles: false });
+        setAddRoleModalOpen(true);
+    };
+
+    const getRoleClass = (role) => {
+        if (!role || !role.name) return 'role-default';
+        return `role-${role.name.toLowerCase().replace('_', '-')}`;
+    };
 
     const renderActiveView = () => {
         switch (activeView) {
             case 'screening':
                 return <VerificationCenter />;
             case 'roleManagement':
-                return <RoleManagementView handleOpenAddRoleModal={handleOpenAddRoleModal} />;
+                return <RoleManagementView
+                    roles={roles}
+                    handleOpenAddRoleModal={handleOpenAddRoleModal}
+                    onOpenDeleteRoleModal={handleOpenDeleteRoleModal}
+                />;
             case 'userManagement':
             default:
                 return <UserManagementView
-                    isLoading={isLoadingUsers}
+                    isLoading={isLoading}
                     filteredUsers={filteredUsers}
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     roleFilter={roleFilter}
                     setRoleFilter={setRoleFilter}
-                    roles={currentRoleOptions}
+                    roles={roles.map(r => ({ value: r.name, label: r.name.replace(/_/g, ' ') }))}
                     getRoleClass={getRoleClass}
                     handleOpenAssignModal={handleOpenAssignModal}
-                    handleOpenDeleteModal={handleOpenDeleteModal}
+                    handleOpenDeleteModal={handleOpenDeleteUserModal}
                 />;
         }
     };
@@ -172,21 +224,42 @@ const AdminDashboardPage = () => {
                 {selectedUser && (
                     <div>
                         <p>Assign a new role to <strong>{selectedUser.name}</strong>.</p>
-                        <select className="custom-select" style={{ width: '100%' }} defaultValue={selectedUser.role} onChange={(e) => handleAssignRole(e.target.value)}>
-                            {currentRoleOptions.map(option => (<option key={option.value} value={option.value}>{option.label}</option>))}
+                        <select
+                            className="custom-select"
+                            style={{ width: '100%' }}
+                            defaultValue={selectedUser.role?.id || ''}
+                            onChange={(e) => handleAssignRole(e.target.value)}
+                        >
+                            <option value="">No Role</option>
+                            {roles.map(role => (
+                                <option key={role.id} value={role.id}>{role.name.replace(/_/g, ' ')}</option>
+                            ))}
                         </select>
                     </div>
                 )}
             </Modal>
 
-            <Modal title="Confirm Deletion" isOpen={isDeleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+            <Modal title="Confirm User Deletion" isOpen={isDeleteUserModalOpen} onClose={() => setDeleteUserModalOpen(false)}>
                 {selectedUser && (
                     <div>
                         <p>Are you sure you want to permanently delete the user <strong>{selectedUser.name}</strong> ({selectedUser.email})?</p>
                         <p className="delete-warning">This action cannot be undone.</p>
                         <div className="modal-actions">
-                            <button className="button-secondary" onClick={() => setDeleteModalOpen(false)}>Cancel</button>
+                            <button className="button-secondary" onClick={() => setDeleteUserModalOpen(false)}>Cancel</button>
                             <button className="button-danger" onClick={handleDeleteUser}>Delete User</button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
+            <Modal title="Confirm Role Deletion" isOpen={!!roleToDelete} onClose={() => setRoleToDelete(null)}>
+                {roleToDelete && (
+                    <div>
+                        <p>Are you sure you want to permanently delete the role <strong>"{roleToDelete.name.replace(/_/g, ' ')}"</strong>?</p>
+                        <p className="delete-warning">This action cannot be undone. Users with this role will be unassigned.</p>
+                        <div className="modal-actions">
+                            <button className="button-secondary" onClick={() => setRoleToDelete(null)}>Cancel</button>
+                            <button className="button-danger" onClick={handleDeleteRole}>Delete Role</button>
                         </div>
                     </div>
                 )}
@@ -194,8 +267,11 @@ const AdminDashboardPage = () => {
 
             <Modal title="Add New Role" isOpen={isAddRoleModalOpen} onClose={() => setAddRoleModalOpen(false)}>
                 <div className="form-group">
-                    <label htmlFor="newRole">Role Name</label>
-                    <input type="text" id="newRole" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} placeholder="e.g., Document Verifier" style={{ width: '100%', padding: '0.8rem', border: '1px solid #dcdfe6', borderRadius: '6px' }} />
+                    <label htmlFor="roleName">Role Name</label>
+                    <input id="roleName" type="text" value={newRole.name} onChange={(e) => setNewRole(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Document Verifier" style={{ width: '100%', padding: '0.8rem', border: '1px solid #dcdfe6', borderRadius: '6px' }} />
+                    <div className="permission-row"><label htmlFor="manageUsers">Can manage users</label><input type="checkbox" id="manageUsers" checked={newRole.can_manage_users} onChange={e => setNewRole(prev => ({ ...prev, can_manage_users: e.target.checked }))} /></div>
+                    <div className="permission-row"><label htmlFor="screenApps">Can screen applications</label><input type="checkbox" id="screenApps" checked={newRole.can_screen_applications} onChange={e => setNewRole(prev => ({ ...prev, can_screen_applications: e.target.checked }))} /></div>
+                    <div className="permission-row"><label htmlFor="manageRoles">Can manage roles</label><input type="checkbox" id="manageRoles" checked={newRole.can_manage_roles} onChange={e => setNewRole(prev => ({ ...prev, can_manage_roles: e.target.checked }))} /></div>
                 </div>
                 <button className="form-button" onClick={handleAddNewRole}>Create Role</button>
             </Modal>
