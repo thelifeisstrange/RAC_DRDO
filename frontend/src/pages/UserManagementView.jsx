@@ -2,13 +2,13 @@
 import React from 'react';
 
 const UserManagementView = ({
+                                isLoading, // --- NEW PROP ADDED HERE ---
                                 filteredUsers, searchQuery, setSearchQuery,
                                 roleFilter, setRoleFilter, roles,
-                                getRoleClass, handleOpenAssignModal
+                                getRoleClass, handleOpenAssignModal,
+                                handleOpenDeleteModal
                             }) => {
     return (
-        // --- THIS IS THE FIX ---
-        // Wrap the entire content in an 'admin-card' div
         <div className="admin-card">
             <h3>User Management</h3>
             <p>View and manage user roles within the system.</p>
@@ -26,22 +26,28 @@ const UserManagementView = ({
             <table className="user-table">
                 <thead><tr><th>Name</th><th>Email</th><th>Current Role</th><th>Action</th></tr></thead>
                 <tbody>
-                {filteredUsers.length > 0 ? (
+                {/* --- THIS IS THE CORRECTED LOGIC --- */}
+                {isLoading ? (
+                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>Loading users...</td></tr>
+                ) : filteredUsers.length > 0 ? (
                     filteredUsers.map(u => (
                         <tr key={u.id}>
                             <td>{u.name}</td>
                             <td>{u.email}</td>
                             <td><span className={`role-pill ${getRoleClass(u.role)}`}>{u.role}</span></td>
-                            <td><button className="action-button" onClick={() => handleOpenAssignModal(u)}>Assign Role</button></td>
+                            <td className="action-buttons-cell">
+                                <button className="action-button" onClick={() => handleOpenAssignModal(u)}>Assign Role</button>
+                                <button className="action-button delete" onClick={() => handleOpenDeleteModal(u)}>Delete</button>
+                            </td>
                         </tr>
                     ))
                 ) : (
-                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>No users found...</td></tr>
+                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>No users found.</td></tr>
                 )}
+                {/* --- END OF CORRECTION --- */}
                 </tbody>
             </table>
         </div>
-        // --- End of fix ---
     );
 };
 

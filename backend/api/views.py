@@ -7,47 +7,40 @@ from users.models import CustomUser
 from .serializers import UserSerializer, RegisterSerializer
 from django.contrib.auth import authenticate
 
-# --- THE NEW, CUSTOM LOGIN VIEW ---
+# --- NEW: Import our custom permission class ---
+from .permissions import IsAdminRole
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def custom_login_view(request):
+    # ... (This login view is correct and does not need to change)
     email = request.data.get('email')
     password = request.data.get('password')
-
-    if email is None or password is None:
-        return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # We still use 'username=email' because our CustomUserBackend expects the email
-    # to be passed in the 'username' parameter of the authenticate function.
     user = authenticate(username=email, password=password)
-
     if not user:
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # Manually generate tokens if the user is valid
+    user.refresh_from_db()
     refresh = RefreshToken.for_user(user)
-
-    # Add our custom claims to the token
     refresh['first_name'] = user.first_name
     refresh['email'] = user.email
     refresh['role'] = user.role
+    return Response({'refresh': str(refresh), 'access': str(refresh.access_token)})
 
-    return Response({
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    })
-
-# --- THE OTHER VIEWS ---
+# --- UPDATED VIEW ---
 class UserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # We now use our simple, reliable role check
+    permission_classes = [IsAdminRole]
 
-class UserDetailView(generics.RetrieveUpdateAPIView):
+# --- UPDATED VIEW ---
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # We now use our simple, reliable role check
+    permission_classes = [IsAdminRole]
 
+# This registration view is correct
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (permissions.AllowAny,)
