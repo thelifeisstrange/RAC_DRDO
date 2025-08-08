@@ -22,17 +22,19 @@ ALLOWED_HOSTS = []
 
 # --- 2. APPLICATION DEFINITION ---
 INSTALLED_APPS = [
-    'corsheaders', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party apps
-    'rest_framework',               
+
+    # 3rd Party Apps
+    'rest_framework',
+    'corsheaders', # Moved here for clarity, still high up
     'django_celery_results',
     'rest_framework_simplejwt',
+
     # Your local apps
     'pipeline',
     'users',
@@ -76,8 +78,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # --- 4. DATABASE CONFIGURATION ---
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'drdo_db',                # The name of the database we created
+        'USER': 'drdo_user',               # The user we created
+        'PASSWORD': '12345',   # The password you chose in Phase 2
+        'HOST': 'localhost',               # Or '127.0.0.1'
+        'PORT': '3306',                  # The default MySQL port
     }
 }
 
@@ -112,14 +118,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django REST Framework (simple setup for now)
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [], # No auth for this phase
-    'DEFAULT_PERMISSION_CLASSES': [],     # No permissions for this phase
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # This is the standard, correct setting from the library
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        # This is a good default to make most endpoints secure
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 # CORS Headers (Allow React dev server to connect)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", # Default Vite dev server address
-    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174"
 ]
 
 # --- 10. UNIFIED REAL-TIME CONFIGURATION (CELERY & CHANNELS) ---
@@ -147,6 +160,5 @@ POPPLER_PATH = os.getenv('POPPLER_PATH')
 AUTH_USER_MODEL = 'users.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of this apps login method.
     'users.backends.CustomUserBackend',
 ]

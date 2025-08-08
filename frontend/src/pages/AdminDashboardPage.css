@@ -1,25 +1,18 @@
-/* src/pages/AdminDashboardPage.css */
-
-/* This line makes all the global variables from index.css available to this file */
 @import "../index.css";
 
-/* --- MAIN LAYOUT STYLES --- */
-/* This creates the two-column layout for the sidebar and the main content */
+/* ------------------ MAIN LAYOUT ------------------ */
 .admin-dashboard-layout {
     display: flex;
-    /* The header is approx 65px tall; this makes the layout fill the rest of the screen height */
-    min-height: calc(100vh - 65px);
+    min-height: calc(100vh - 65px); /* Assuming 65px is the header height */
 }
 
 .admin-content-area {
-    flex-grow: 1; /* This makes the main content area take up all available space */
+    flex-grow: 1;
     padding: 2.5rem;
-    overflow-y: auto; /* Adds a scrollbar if the content is too long */
+    overflow-y: auto;
 }
-/* --- End of Layout Styles --- */
 
-
-/* --- STYLES FOR CARDS (Used by User & Role Management) --- */
+/* ------------------ CARD ------------------ */
 .admin-card {
     background: var(--color-bg-card);
     padding: 2rem;
@@ -38,91 +31,336 @@
 .admin-card p {
     color: var(--color-text-muted);
     margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
-
-/* --- STYLES FOR USER MANAGEMENT TABLE & CONTROLS --- */
+/* ------------------ CONTROLS & FORMS ------------------ */
 .controls-container {
     display: flex;
     gap: 1rem;
-    margin: 1.5rem 0;
+    margin-bottom: 1.5rem;
     align-items: center;
+    flex-wrap: wrap;
 }
-.search-input, .filter-select {
-    padding: 0.6rem 1rem;
+
+.search-input {
+    flex-grow: 1;
+    min-width: 250px;
+}
+
+.filter-select {
+    min-width: 200px;
+}
+
+.search-input,
+.filter-select,
+.form-group-input {
+    padding: 0.8rem 1rem;
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: var(--font-primary);
-    background-color: var(--color-bg-card); /* Ensure inputs have correct background */
-    color: var(--color-text-body); /* Ensure text is readable */
+    background-color: var(--color-bg-card);
+    color: var(--color-text-body);
+    box-sizing: border-box;
 }
-.search-input { flex-grow: 1; }
-.filter-select { min-width: 200px; }
-.search-input:focus, .filter-select:focus {
+
+.search-input:focus,
+.filter-select:focus,
+.form-group-input:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
-.user-table {
+
+/* ------------------ TABLE STYLES ------------------ */
+.user-table,
+.role-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 2rem;
 }
-.user-table th, .user-table td {
+
+.user-table th,
+.user-table td,
+.role-table th,
+.role-table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--color-border);
+    vertical-align: middle; /* Ensures vertical alignment */
 }
-.user-table th {
-    font-weight: 500;
+
+.user-table th,
+.role-table th {
+    font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-muted);
 }
-.user-table tr:last-child td { border-bottom: none; }
 
-/* Role Pills */
+.user-table tr:last-child td,
+.role-table tr:last-child td {
+    border-bottom: none;
+}
+
+.role-table tbody tr:hover {
+    background-color: var(--color-bg-main);
+}
+
+.role-table td:first-child {
+    font-weight: 600;
+    color: var(--color-text-heading);
+}
+
+.role-table .role-name-header {
+    width: 25%;
+}
+
+.role-table .permission-header,
+.role-table .permission-cell {
+    text-align: center;
+}
+
+.role-table .actions-header,
+.role-table .actions-cell {
+    text-align: right;
+}
+
+
+/* ------------------ BUTTONS ------------------ */
+.action-button,
+.create-role-button,
+.button-secondary,
+.button-danger {
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.25;
+}
+
+.action-button {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+}
+
+.action-button:hover {
+    background-color: var(--color-bg-main);
+}
+
+/* --- NEW STYLE FOR PRIMARY ACTION --- */
+.action-button.primary {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.action-button.primary:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.action-button.delete {
+    border-color: var(--color-red-text);
+    color: var(--color-red-text);
+}
+
+.action-button.delete:hover {
+    background-color: var(--color-red-bg);
+}
+
+.create-role-button {
+    background-color: var(--color-primary);
+    color: white;
+    /* Style for icon alignment */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.create-role-button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.delete-role-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 0.25rem;
+    border-radius: 9999px;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.delete-role-button:hover {
+    color: var(--color-red-text);
+    background-color: var(--color-red-bg);
+}
+
+/* ------------------ ROLE PILL & STATUS TAGS ------------------ */
 .role-pill {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: capitalize;
+    display: inline-block;
 }
-.role-admin { background-color: var(--color-indigo-bg); color: var(--color-indigo-text); }
-.role-screening-member { background-color: var(--color-blue-bg); color: var(--color-blue-text); }
-.role-applicant { background-color: var(--color-bg-main); color: var(--color-text-muted); }
-.role-default { background-color: #f3f4f6; color: #4b5563; }
 
-/* Buttons */
-.action-button, .create-role-button {
-    border: none;
-    border-radius: 0.5rem;
+.role-admin {
+    background-color: var(--color-indigo-bg);
+    color: var(--color-indigo-text);
+}
+
+.role-screening-member {
+    background-color: var(--color-blue-bg);
+    color: var(--color-blue-text);
+}
+
+.role-applicant {
+    background-color: var(--color-bg-main);
+    color: var(--color-text-muted);
+}
+
+/* --- UPDATED STYLE FOR "NO ROLE" PILL --- */
+.role-default, .role-no-role {
+    background-color: #eef2f7; /* A cooler, more defined gray */
+    color: #374151;            /* Darker text for better contrast */
+    border: 1px solid #e5e7eb; /* Add a subtle border */
+    font-weight: 500;
+}
+
+/* Replaces the old .locked-role style */
+.locked-role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    background-color: #eef2ff; /* Light indigo, assuming var(--color-indigo-bg) */
+    color: #4338ca;            /* Dark indigo, assuming var(--color-indigo-text) */
+    border-radius: 9999px;
+    font-size: 0.8rem;
     font-weight: 600;
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
 }
-.action-button {
-    background-color: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-body);
-}
-.action-button:hover { background-color: var(--color-bg-main); }
-.create-role-button { background-color: var(--color-primary); color: white; }
-.create-role-button:hover { background-color: var(--color-primary-hover); }
 
-/* Custom Select Arrow (used in filters and modals) */
+
+/* ------------------ PERMISSION ICONS ------------------ */
+.permission-icon-wrapper {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.permission-icon-wrapper.granted {
+    background-color: #e0f2f1; /* Light green */
+    color: #00796b;         /* Dark green */
+}
+.permission-icon-wrapper.denied {
+    background-color: #ffedeb; /* Light red */
+    color: #d32f2f;          /* Dark red */
+}
+
+
+/* ------------------ MODAL SPECIFIC STYLES ------------------ */
 .custom-select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    color: var(--color-text-body);
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.75rem center;
     background-repeat: no-repeat;
-    background-size: 1em;
-    padding-right: 2.5rem !important;
+    background-size: 1.25em;
+    padding-right: 3rem;
+}
+
+.delete-warning {
+    color: var(--color-red-text);
+    background-color: var(--color-red-bg);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.action-buttons-cell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.button-secondary {
+    background-color: var(--color-bg-main);
+    color: var(--color-text-body);
+    border: 1px solid var(--color-border);
+}
+
+.button-secondary:hover {
+    background-color: #e5e7eb; /* A slightly darker gray for hover */
+}
+
+.button-danger {
+    background-color: var(--color-red-text);
+    color: white;
+}
+
+.button-danger:hover {
+    background-color: #b91c1c; /* A darker red for hover */
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-body);
+}
+
+.permission-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    gap: 1rem;
+}
+
+.permission-row label {
+    font-weight: 500;
+    margin-bottom: 0; /* Override default label margin */
+}
+
+.permission-row input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--color-primary);
+    flex-shrink: 0;
 }

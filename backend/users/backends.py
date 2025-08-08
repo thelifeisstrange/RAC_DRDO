@@ -4,20 +4,16 @@ from .models import CustomUser
 
 class CustomUserBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
-        # We use 'username' here because that's what the system passes,
-        # but we know it actually contains the email.
-        email = username
+        # This is for the login form
         try:
-            # Find the user by their email address, which is our login field.
-            user = CustomUser.objects.get(email=email)
-            # Check if the provided password is correct for that user.
+            user = CustomUser.objects.get(email=username)
             if user.check_password(password):
                 return user
         except CustomUser.DoesNotExist:
-            # No user was found, so authentication fails.
             return None
 
     def get_user(self, user_id):
+        # This is the crucial part for authenticating API requests
         try:
             return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
