@@ -20,3 +20,6 @@ openpyxl
 Pillow
 pdf2image
 together
+
+# === Database ===
+mysqlclient
