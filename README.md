@@ -4,7 +4,7 @@ This repository contains the backend (Django + MySQL) and frontend (Vite + Node.
 
 ---
 
-## 📦 Installation & Setup Guide
+## Installation & Setup Guide
 
 Follow these steps **exactly** to set up and run the project.
 
