@@ -1,6 +1,6 @@
 # DRDO Application Portal
 
-This repository contains the backend (Django + MySQL) and frontend (Vite + Node.js) code for the DRDO application portal.
+This repository contains the backend (Django + MySQL) and frontend (Vite + React) code for the DRDO application portal.
 
 ---
 
