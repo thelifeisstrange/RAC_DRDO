@@ -40,20 +40,7 @@ mysql -u <username> -p
 CREATE DATABASE drdo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Now, configure your database connection in `backend/backend/settings.py`:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'drdo_db',         # Database name from CREATE DATABASE
-        'USER': 'your_mysql_user', # Your MySQL username
-        'PASSWORD': 'your_mysql_password',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
-}
-```
+Compelete .env Config according to .env.example (for Database)
 
 ---
 
@@ -64,6 +51,7 @@ Clear previous migration files if any from `api`, `users`, and `pipeline` apps.
 Run:
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 ```
@@ -134,8 +122,8 @@ Run:
 
 ```python
 from users.models import CustomUser, Role
-admin_role = Role.objects.get(name='ADMIN')
-superuser = CustomUser.objects.get(email='your super user email')
+admin_role = Role.objects.get(name='admin')
+superuser = CustomUser.objects.get(email='admin@gmail.com')
 superuser.role = admin_role
 superuser.save()
 print(superuser.role)  # Should print: ADMIN
@@ -166,3 +154,14 @@ npm run dev
 ## You’re Ready to Build!
 
 The backend will run on `http://127.0.0.1:8000` and the frontend on the Vite development server.
+
+
+## Pipeline Config (Temporary)
+
+```bash
+python manage.py makemigrations pipeline
+python manage.py migrate
+```
+
+
+

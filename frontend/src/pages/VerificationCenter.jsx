@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './VerificationCenter.css'; // Points to the new, scoped CSS file
+import { useAuth } from '../context/AuthContext.jsx';
 
 // Import all the child components this view depends on
 // (Make sure these files exist in your components/dashboard/ directory)
@@ -70,6 +71,7 @@ const transformApiResult = (data) => {
 
 // --- Main Component ---
 const VerificationCenter = () => {
+  const { authTokens } = useAuth();
   const [csvFile, setCsvFile] = useState(null);
   const [sourceFiles, setSourceFiles] = useState([]);
   const [pipelineStatus, setPipelineStatus] = useState('Awaiting files...');
@@ -84,8 +86,22 @@ const VerificationCenter = () => {
   const pollJobStatus = (id) => {
     if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     pollingIntervalRef.current = setInterval(async () => {
+
+      if (!authTokens) {
+        setPipelineStatus('❌ Authentication error during status check.');
+        clearInterval(pollingIntervalRef.current);
+        setIsLoading(false);
+        return;
+      }
+
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${authTokens.access}`
+        }
+      };
+
       try {
-        const response = await axios.get(`${API_BASE_URL}/status/${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/status/${id}/`, config);
         const { job, results: apiResults } = response.data;
         const transformedResults = apiResults.map(transformApiResult);
         setResults(transformedResults);
@@ -104,6 +120,13 @@ const VerificationCenter = () => {
   };
 
   const handleRunPipeline = async () => {
+
+    // <<< 1. Check for tokens first. Good practice.
+    if (!authTokens) {
+      setPipelineStatus('❌ Authentication error. Please log in again.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('master_csv', csvFile);
     sourceFiles.forEach(file => formData.append('source_files', file));
@@ -112,8 +135,16 @@ const VerificationCenter = () => {
     setJobId(null);
     if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     setPipelineStatus('Uploading files and starting job...');
+
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${authTokens.access}`
+      }
+    };
+    
     try {
-      const response = await axios.post(`${API_BASE_URL}/start/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const response = await axios.post(`${API_BASE_URL}/start/`, formData, config);
       const newJobId = response.data.id;
       setJobId(newJobId);
       setPipelineStatus('Job started! Fetching results...');

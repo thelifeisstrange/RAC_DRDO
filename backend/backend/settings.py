@@ -79,11 +79,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'drdo_db',                # The name of the database we created
-        'USER': 'drdo_user',               # The user we created
-        'PASSWORD': '12345',   # The password you chose in Phase 2
-        'HOST': 'localhost',               # Or '127.0.0.1'
-        'PORT': '3306',                  # The default MySQL port
+        'NAME': os.getenv('MYSQL_DATABASE'),                # The name of the database we created
+        'USER': os.getenv('MYSQL_USERNAME'),               # The user we created
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),   # The password you chose in Phase 2
+        'HOST': os.getenv('MYSQL_HOST'),               # Or '127.0.0.1'
+        'PORT': os.getenv('MYSQL_PORT'),                  # The default MySQL port
     }
 }
 
