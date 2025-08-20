@@ -15,11 +15,5 @@ RUN apt-get update && apt-get install -y build-essential
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 #Copy your application code into the container
 COPY . /app/
-
-# Step 8: Set the entrypoint script as the command to run on container start
-ENTRYPOINT ["/app/entrypoint.sh"]
