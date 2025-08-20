@@ -1,0 +1,30 @@
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Python virtual environment
+env/
+venv/
+venv_old/
+localenv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local development database
+db.sqlite3
+
+# Uploaded media files (these will be handled by volumes)
+media/
+temp_compress/
+uploads/
+
+# Local model files (these should be mounted, not copied)
+# gemmamodel/ # (Uncomment if you have this folder in your project)
+
+# Local run files (these should not be included in the Docker image)

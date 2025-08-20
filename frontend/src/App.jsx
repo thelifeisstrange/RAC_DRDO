@@ -61,7 +61,7 @@ function App() {
             />
             <Route
                 path="/admin-dashboard"
-                element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>}
+                element={<AdminDashboardPage />}
             />
             <Route
                 path="/applicant-dashboard"

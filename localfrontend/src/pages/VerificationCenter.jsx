@@ -5,17 +5,17 @@ import axios from 'axios';
 import './VerificationCenter.css';
 
 // Import all the child components this view depends on
-import FileUploadZone from '../components/dashboard/FileUploadZone';
-import LoadingState from '../components/dashboard/LoadingState';
-import DetailedTableView from '../components/dashboard/DetailedTableView';
+import FileUploadZone from '../components/FileUploadZone';
+import LoadingState from '../components/LoadingState';
+import DetailedTableView from '../components/DetailedTableView';
 // Note: We are only using DetailedTableView in this simplified version
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/pipeline';
+const API_BASE_URL = 'http://localhost:8000/api/pipeline';
 
 // This function correctly transforms the simple backend's result format
 const transformApiResult = (dataWrapper) => {
   const data = dataWrapper.data; // The result is nested under a 'data' key
-  const fields = ['name', 'reg_id', 'year', 'score', 'scoreof100', 'rank'];
+  const fields = ['name', 'father_name', 'reg_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
   const transformed = {
     id: data.id || 'N/A',
     sourceFile: data.id ? `${data.id}_GATE` : 'Unknown File',

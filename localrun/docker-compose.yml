@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # The Redis service
+  redis:
+    image: redis:6.2-alpine # Use a specific, lightweight version of Redis
+    container_name: verification_redis
+    ports:
+      - "6379:6379" # Map the container's port 6379 to your host machine's port 6379
+    volumes:
+      - redis_data:/data # Persist Redis data across restarts
+
+  # The Django Web Server service (Daphne or runserver)
+  web:
+    build: . # Build the image from the Dockerfile in the current directory
+    container_name: verification_web
+    command: python manage.py runserver 0.0.0.0:8000 # The command to start the server
+    volumes:
+      - .:/app # Mount your local code into the container for live-reloading
+      - media_volume:/app/media # Persist uploaded files
+    ports:
+      - "8000:8000" # Map container port 8000 to host port 8000
+    env_file:
+      - .env # Pass environment variables from your .env file
+    depends_on:
+      - redis # Tell Docker to start the Redis service before this one
+
+  # The Celery Worker service
+  celery:
+    build: . # Build from the exact same Dockerfile as the web service
+    container_name: verification_celery
+    command: celery -A localrun worker -l info # The command to start the worker
+    volumes:
+      - .:/app # Mount local code for live-reloading
+      - media_volume:/app/media # Share the same media volume
+    env_file:
+      - .env # Pass the same environment variables
+    depends_on:
+      - redis # Also depends on Redis
+
+volumes:
+  redis_data:
+  media_volume:

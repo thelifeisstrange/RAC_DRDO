@@ -12,3 +12,36 @@ dump.rdb
 .DS_Store
 Thumbs.db
 
+localenv/
+*.log
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+migrations/
+*.sqlite3
+*.db    
+*.db-journal
+*.log
+
+# Ignore Python virtual environments
+
+# Media and static files (if generated dynamically)
+media/
+staticfiles/
+static/
+uploaded_files/
+uploads/
+
+
+
+# Byte-compiled / cached files
+__pycache__/
+*.py[cod]
+*$py.class
+**/migrations/
+!**/migrations/__init__.py
+migrations/
+
