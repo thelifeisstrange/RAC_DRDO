@@ -46,7 +46,8 @@ def _extract_data_from_local_model(image_path, prompt):
     """
     try:
         # The URL for the local llama-server's CHAT completions endpoint
-        url = "http://host.docker.internal:8080/v1/chat/completions" # <-- Using the standard chat endpoint
+        # url = "http://host.docker.internal:8080/v1/chat/completions"
+        url = "http://127.0.0.1:8080/v1/chat/completions" # <-- Using the standard chat endpoint
         
         image_data_uri = _encode_image_to_base64_uri(image_path)
         
@@ -84,3 +85,39 @@ def _extract_data_from_local_model(image_path, prompt):
         return f"ERROR: Network error connecting to local model - {e}"
     except Exception as e:
         return f"ERROR: An unexpected error occurred in local extraction - {e}"
+    
+# --- ADD THIS NEW FUNCTION ---
+def extract_single_field(image_path, field_name, context_hint=""):
+    """
+    Uses a highly focused prompt to extract only one specific field from an image.
+
+    Args:
+        image_path (str): Path to the compressed image.
+        field_name (str): The name of the field to extract (e.g., "Registration Number").
+        context_hint (str): Optional hint to help the model, like the candidate's name.
+
+    Returns:
+        str: The extracted value for the single field, or None if it fails.
+    """
+    print(f"[EXTRACT WORKER - RETRY] Attempting to re-extract '{field_name}'...")
+    
+    # Create a very specific and strict prompt
+    prompt = (
+        f"The document shows information for a candidate named '{context_hint}'. "
+        f"Analyze the image and extract ONLY the {field_name}. "
+        f"Do not provide any other text, labels, or explanations. "
+        f"Just return the value of the {field_name}."
+    )
+
+    # We can reuse the main extraction logic, which now returns an error string on failure
+    raw_response = _extract_data_from_local_model(image_path, prompt)
+
+    if raw_response.startswith("ERROR:"):
+        print(f"[EXTRACT WORKER - RETRY] Failed: {raw_response}")
+        return None
+    
+    # Clean the response, removing potential markdown or labels
+    cleaned_response = raw_response.replace(f"{field_name}:", "").strip().replace('*', '').replace('`', '')
+    
+    print(f"[EXTRACT WORKER - RETRY] Success. Re-extracted value: '{cleaned_response}'")
+    return cleaned_response

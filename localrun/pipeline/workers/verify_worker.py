@@ -24,6 +24,9 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
     final_row = [file_id, master_row.get('email', 'N/A'), master_row.get('phone_number', 'N/A')]
     chars_to_strip = string.whitespace + '.,'
 
+    failed_fields = []
+
+
     fields_to_compare = {
         'name': 'name',
         'father_name': 'father_name',
@@ -43,7 +46,11 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
         compare_extracted = str(extracted_val).lower().strip(chars_to_strip)
         
         status = "True" if (compare_input == compare_extracted and compare_input != '') else "False"
+
+        # NEW: If the status is False, add the field name to our tracking list.
+        if status == "False":
+            failed_fields.append(report_field) # Use the key, e.g., 'registration_id'
         
         final_row.extend([input_val if pd.notna(input_val) else 'n/a', extracted_val, status])
-        
-    return final_row
+                
+    return final_row, failed_fields

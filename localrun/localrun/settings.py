@@ -148,8 +148,8 @@ CORS_ALLOWED_ORIGINS = [
 STATIC_URL = "static/"
 
 # Define the single source of truth for our Redis connection
-REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-# REDIS_URL = 'redis://127.0.0.1:6379/0'
+# REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+REDIS_URL = 'redis://127.0.0.1:6379/0'
 
 POPPLER_PATH = os.getenv('POPPLER_PATH')
 

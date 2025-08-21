@@ -7,7 +7,7 @@ from django.conf import settings
 from .models import VerificationJob, VerificationResult # Use the simple Result model
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
-from .workers.extract_worker import extract_and_parse
+from .workers.extract_worker import extract_and_parse, extract_single_field
 from .workers.verify_worker import verify_and_create_row # Use the simple verify function
 from .workers.derive_worker import derive_paper_code
 
@@ -37,7 +37,22 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
         ]
         # The AI needs to extract 7 fields now (including father_name)
         base_extract_headers = ['name', 'father_name', 'registration_id', 'year', 'score', 'scoreof100', 'rank']
-        prompt = "Extract Candidate Name, Father's Name, Registration Number - 13 Character, Year of Examination, Gate score, Marks out of 100, All India ranking comma saperated in a single line. Example output format: Candidate's Name, Father's Name, RegNo, Year, GATE Score, Marks, All India Rank"
+        prompt = """From the provided image of a GATE scorecard, extract the specified fields. The output MUST be a single line of comma-separated values without any headers or labels.
+        Fields to Extract:
+            1.Candidate's Name
+            2.Father's Name
+            3.Registration Number: This is a critical 13-character alphanumeric code. It follows a strict pattern: XXYYSA####### where:
+                                    XX is the 2-letter paper code (e.g., CS, ME, EC).
+                                    YY is the 2-digit examination year (e.g., 22 for 2022).
+                                    SA is the session identifier, like S1, S2, S3, etc.
+                                    ####### is the 7-digit unique applicant ID - Numbers Only.
+                                    The entire string (e.g., CS22S12093082) MUST be extracted as one piece.
+            4.Year of Examination: Extract the 4-digit year.
+            5.GATE Score: The normalized score, typically out of 1000.
+            6.Marks out of 100: The actual marks obtained by the candidate.
+            7.All India Rank: The candidate's rank, often labeled as AIR.
+            Output Format Example:
+            John Doe,Robert Doe,CS24S21098765,2024,850,85.50,123"""
 
         for file_path in source_file_paths:
             file_name = os.path.basename(file_path)
@@ -52,13 +67,35 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
             if not compressed_path:
                 result_row_list = [file_name.split('_')[0], 'N/A', 'N/A', 'N/A', 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 6)
             else:
+                # Step 1: Initial broad extraction
                 extracted_data_list = extract_and_parse(compressed_path, prompt, len(base_extract_headers))
                 extracted_dict = dict(zip(base_extract_headers, extracted_data_list)) if isinstance(extracted_data_list, list) and len(extracted_data_list) == len(base_extract_headers) else {}
-                # Call the new derive worker to add the paper_code
-                extracted_dict_with_code = derive_paper_code(extracted_dict)
+                
+                # Step 2: Initial verification
+                # We will re-run this later if a retry happens.
+                _, failed_fields = verify_and_create_row(master_df, file_path, extracted_dict)
 
-                # Pass the dictionary to the verify worker
-                result_row_list = verify_and_create_row(master_df, file_path, extracted_dict_with_code)
+                # Step 3: Check for registration_id failure and trigger retry
+                if 'registration_id' in failed_fields:
+                    print(f"[RETRY LOGIC] Registration ID failed for {file_name}. Triggering focused extraction.")
+                    
+                    applicant_id = file_name.split('_')[0]
+                    master_row = master_df.loc[applicant_id]
+                    candidate_name_hint = master_row.get('name', '')
+                    
+                    # The new_reg_id is created and used ONLY inside this block
+                    new_reg_id = extract_single_field(compressed_path, "Registration Number", candidate_name_hint)
+                    
+                    if new_reg_id:
+                        print(f"[RETRY LOGIC] Success. Old: '{extracted_dict.get('registration_id')}', New: '{new_reg_id}'")
+                        extracted_dict['registration_id'] = new_reg_id
+                
+                # Step 4: Always run derivation on the (potentially corrected) dictionary
+                final_extracted_dict = derive_paper_code(extracted_dict)
+
+                # Step 5: Run the final verification on the fully populated dictionary to get the final report row
+                result_row_list, _ = verify_and_create_row(master_df, file_path, final_extracted_dict)
+
             
             result_dict = dict(zip(final_headers, result_row_list))
             VerificationResult.objects.create(job=job, data=result_dict)
