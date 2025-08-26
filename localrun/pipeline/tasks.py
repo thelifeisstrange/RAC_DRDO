@@ -7,9 +7,11 @@ from django.conf import settings
 from .models import VerificationJob, VerificationResult,ParsedResult # Use the simple Result model
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
-from .workers.extract_worker import extract_and_parse, extract_single_field, initialize_client
+from .workers.local_extract_worker import extract_and_parse, extract_single_field
+# from .workers.extract_worker import extract_and_parse, extract_single_field, initialize_client
 from .workers.verify_worker import verify_and_create_row # Use the simple verify function
 from .workers.derive_worker import derive_paper_code
+from .workers.orientation_worker import correct_orientation_in_place
 
 @shared_task
 def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
@@ -21,7 +23,7 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
     os.makedirs(temp_compress_dir, exist_ok=True)
 
     try:
-        initialize_client()
+        # initialize_client()
         master_df = load_and_prepare_csv(master_csv_path)
         if master_df is None: raise Exception("Failed to load master data.")
 
@@ -68,6 +70,11 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
             if not compressed_path:
                 result_row_list = [file_name.split('_')[0], 'N/A', 'N/A', 'N/A', 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 6)
             else:
+
+                orientation_success = correct_orientation_in_place(compressed_path)
+                if not orientation_success:
+                    print(f"[PIPELINE] WARNING: Orientation correction failed for {file_name}. Proceeding with original compressed image.")
+                    
                 # Step 1: Initial broad extraction
                 extracted_data_list = extract_and_parse(compressed_path, prompt, len(base_extract_headers))
                 extracted_dict = dict(zip(base_extract_headers, extracted_data_list)) if isinstance(extracted_data_list, list) and len(extracted_data_list) == len(base_extract_headers) else {}

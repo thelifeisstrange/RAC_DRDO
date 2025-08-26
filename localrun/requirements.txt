@@ -22,4 +22,7 @@ pdf2image
 together
 requests
 
+opencv-python-headless
+pytesseract
+
 
