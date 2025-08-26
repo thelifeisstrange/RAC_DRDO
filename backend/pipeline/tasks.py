@@ -4,7 +4,7 @@ import shutil
 import pandas as pd
 from celery import shared_task
 from django.conf import settings
-from .models import VerificationJob, VerificationResult
+from .models import VerificationJob, VerificationResult, ParsedResult 
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
 from .workers.extract_worker import extract_and_parse, initialize_client
@@ -59,6 +59,10 @@ def run_verification_pipeline(job_id):
 
             # Save the sanitized dictionary to the database.
             VerificationResult.objects.create(job=job, data=sanitized_dict)
+            
+            # NEW STEP: Also parse the JSON into ParsedResult rows
+            save_parsed_results(VerificationResult)
+
             print(f"[CELERY TASK] Saved result for {file_name} to the database.")
             
             processed_count += 1
@@ -77,3 +81,14 @@ def run_verification_pipeline(job_id):
         if os.path.exists(temp_compress_dir):
             print(f"[CELERY TASK] Cleaning up temporary directory: {temp_compress_dir}")
             shutil.rmtree(temp_compress_dir)
+            
+def save_parsed_results(verification_result):
+    """Take the JSON from VerificationResult and store it in ParsedResult table"""
+    data = verification_result.data
+    if isinstance(data, dict):
+        for key, value in data.items():
+            ParsedResult.objects.create(
+                verification_result=verification_result,
+                field_name=key,
+                field_value=str(value)
+            )

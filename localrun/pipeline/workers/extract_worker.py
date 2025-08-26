@@ -3,12 +3,25 @@
 import os
 import base64
 import mimetypes
-import requests
-import json
+# Removed unused imports: requests, json
+from together import Together
+
+# --- CHANGE 1: Initialize client to None at the module level ---
+client = None
+
+def initialize_client():
+    """
+    Initializes the global client using the environment variable.
+    This must be called by the main script AFTER load_dotenv().
+    """
+    global client
+    # The API key is now expected to be in the environment when this is called
+    client = Together()
+    print("-> Extract worker client initialized successfully.")
 
 def extract_and_parse(image_path, prompt, expected_columns):
     """
-    Extracts data from an image by calling the local llama-server,
+    Extracts data from an image by calling the Together AI API,
     then parses the response.
     """
     raw_response = _extract_data_from_local_model(image_path, prompt)
@@ -35,57 +48,50 @@ def _encode_image_to_base64_uri(file_path):
         raise ValueError(f"File is not a recognized image type: {file_path}")
     with open(file_path, "rb") as image_file:
         base64_data = base64.b64encode(image_file.read()).decode('utf-8')
-    # The llama.cpp server's OpenAI-compatible endpoint expects this full Data URI format
+    # This full Data URI format is compatible with the Together AI API
     return f"data:{mime_type};base64,{base64_data}"
 
 
 def _extract_data_from_local_model(image_path, prompt):
     """
-    This is the new core function. It sends a request to your local
-    llama-server with the correct OpenAI-compatible payload for vision models.
+    This is the new core function. It sends a request to the Together AI API
+    using the initialized client. The function name is kept for compatibility.
     """
+    if client is None:
+        return "ERROR: Together AI client is not initialized. Call initialize_client() first."
+
     try:
-        # The URL for the local llama-server's CHAT completions endpoint
-        # url = "http://host.docker.internal:8080/v1/chat/completions"
-        url = "http://127.0.0.1:8080/v1/chat/completions" # <-- Using the standard chat endpoint
-        
-        image_data_uri = _encode_image_to_base64_uri(image_path)
-        
-        # --- START OF THE CRITICAL FIX ---
-        # This is the correct, modern, OpenAI-compatible format for multi-modal input.
-        # It's a list of message objects, where the user's message content is a list of parts.
-        payload = {
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image_url", "image_url": {"url": image_data_uri}},
-                        {"type": "text", "text": prompt}
-                    ]
-                }
-            ],
-            "max_tokens": 256,
-            "temperature": 0.1
-        }
-        # --- END OF THE CRITICAL FIX ---
+        # Use the existing helper to encode the image
+        base64_uri = _encode_image_to_base64_uri(image_path)
 
-        headers = {"Content-Type": "application/json"}
+        print(f"[EXTRACT WORKER] Sending request to Together API for: {os.path.basename(image_path)}")
 
-        print(f"[EXTRACT WORKER] Sending request to local model for: {os.path.basename(image_path)}")
-        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=300)
-        response.raise_for_status()
-        
-        response_data = response.json()
-        content = response_data['choices'][0]['message']['content']
+        # --- THIS IS THE API CALL USING THE 'together' CLIENT ---
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": base64_uri}}
+                ]
+            }],
+            max_tokens=256,
+            temperature=0.1
+        )
+        # --- END OF THE API CALL ---
+
+        content = response.choices[0].message.content
         print(f"[EXTRACT WORKER] Received response: '{content[:70].strip()}...'")
         
         return content.strip()
 
-    except requests.exceptions.RequestException as e:
-        return f"ERROR: Network error connecting to local model - {e}"
+    except ValueError as e: # Catches file-related error from _encode_image_to_base64_uri
+        return f"ERROR: File error - {e}"
     except Exception as e:
-        return f"ERROR: An unexpected error occurred in local extraction - {e}"
-    
+        # This will catch API errors from Together (auth, rate limits) and other issues.
+        return f"ERROR: An unexpected error occurred during API extraction - {e}"
+
 # --- ADD THIS NEW FUNCTION ---
 def extract_single_field(image_path, field_name, context_hint=""):
     """
@@ -109,7 +115,7 @@ def extract_single_field(image_path, field_name, context_hint=""):
         f"Just return the value of the {field_name}."
     )
 
-    # We can reuse the main extraction logic, which now returns an error string on failure
+    # This call now correctly routes to the Together AI API via the modified function
     raw_response = _extract_data_from_local_model(image_path, prompt)
 
     if raw_response.startswith("ERROR:"):
