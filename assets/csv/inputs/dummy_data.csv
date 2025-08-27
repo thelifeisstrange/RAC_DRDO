@@ -1,0 +1,2 @@
+basic_id, name, father_name, mother_name, dob, category, gate_year, registration_number, gate_paper_code, gate_valid_score, gate_mark, gate_rank, degree_name, subject_name, university_name, percentage, cgpa_calculation, passing_year, degree_division
+"52319","Aman Gupta","Amit Kumar","Nelu Gupta","2003-11-04","SC","2025","CS25S62406022","CS","213","31.33","5732","Bachelor of Technology","Computer Science and Engineering","National Institute of Technology, Bhubaneswar","85.7","8.52","2025","I"

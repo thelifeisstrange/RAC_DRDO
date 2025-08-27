@@ -1,4 +1,5 @@
 // src/components/dashboard/DetailedTableView.jsx
+
 import React from 'react';
 
 // --- Reusable SVG Icons ---
@@ -10,7 +11,7 @@ const ChevronDown = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" vi
 const ProgressRing = ({ percentage, size = 32 }) => {
     const radius = size / 2 - 4;
     const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
+    const offset = circumference - ((percentage || 0) / 100) * circumference;
     return (
         <div className="progress-circle-wrapper" style={{ width: size, height: size }}>
             <svg className="progress-circle" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -23,6 +24,7 @@ const ProgressRing = ({ percentage, size = 32 }) => {
 
 // --- Reusable Detail Field Card Component ---
 const DetailField = ({ label, data }) => {
+    if (!data) return null;
     const isMismatched = !data.status;
     return (
         <div className={`detail-field-item ${isMismatched ? 'mismatched' : ''}`}>
@@ -39,14 +41,16 @@ const DetailField = ({ label, data }) => {
 };
 
 // --- Main Detailed Table View Component ---
+// MODIFICATION: Removed 'onSave' and 'savedIds' from the props.
 const DetailedTableView = ({ data, expandedRowId, setExpandedRowId }) => {
     const toggleRow = (id) => setExpandedRowId(expandedRowId === id ? null : id);
-     const fieldLabels = { 
+    
+    const fieldLabels = { 
         name: 'Name', 
-        father_name: 'Father Name', // Added
+        father_name: 'Father Name',
         registration_id: 'Registration ID', 
         year: 'Year',
-        paper_code: 'Paper Code', // Added
+        paper_code: 'Paper Code',
         score: 'Score', 
         scoreof100: 'Score of 100', 
         rank: 'Rank' 
@@ -65,7 +69,7 @@ const DetailedTableView = ({ data, expandedRowId, setExpandedRowId }) => {
                             <td><span className={`status-pill ${row.status.toLowerCase()}`}>{row.status}</span></td>
                             <td>
                                 <div className="match-fraction">
-                                    <ProgressRing percentage={(row.matches / row.totalFields) * 100} />
+                                    <ProgressRing percentage={((row.matches || 0) / (row.totalFields || 1)) * 100} />
                                     <span className="fraction-text">{row.matches}/{row.totalFields}</span>
                                 </div>
                             </td>
@@ -76,6 +80,7 @@ const DetailedTableView = ({ data, expandedRowId, setExpandedRowId }) => {
                                 <div className="detail-row-content">
                                     <div className="detail-summary"><h4>Verification Details for {row.sourceFile}</h4><p>Comparing data from the master CSV with content extracted from the document.</p></div>
                                     <div className="detail-grid">{Object.keys(fieldLabels).map(fieldKey => (row[fieldKey] ? <DetailField key={fieldKey} label={fieldLabels[fieldKey]} data={row[fieldKey]} /> : null))}</div>
+                                    {/* --- MODIFICATION: The individual action buttons are now removed --- */}
                                 </div>
                             </td></tr>
                         )}
