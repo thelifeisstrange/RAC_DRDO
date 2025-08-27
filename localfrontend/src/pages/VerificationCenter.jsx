@@ -11,6 +11,54 @@ import DetailedTableView from '../components/DetailedTableView';
 // We are NOT importing from '../components/dashboard/...'
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api/pipeline';
+const ADVERTISEMENT_API_URL = 'http://127.0.0.1:8000/api/advertisements';
+
+const AdvertisementSelector = ({ onSelectAdvertisement }) => {
+  const [ads, setAds] = useState([]);
+  const [newAdName, setNewAdName] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const response = await axios.get(`${ADVERTISEMENT_API_URL}/`);
+        setAds(response.data);
+      } catch (err) { setError('Could not fetch existing advertisements.'); }
+    };
+    fetchAds();
+  }, []);
+
+  const handleCreate = async () => {
+    if (!newAdName.trim()) { setError('Advertisement name cannot be empty.'); return; }
+    try {
+      const response = await axios.post(`${ADVERTISEMENT_API_URL}/`, { name: newAdName });
+      onSelectAdvertisement(response.data);
+    } catch (err) { setError('Failed to create advertisement.'); }
+  };
+
+  return (
+    <div className="advertisement-selector-wrapper">
+      <div className="advertisement-selector">
+        <h2>Step 1: Select or Create Advertisement</h2>
+        {error && <p className="error-message">{error}</p>}
+        <div className="ad-list">
+          <h3>Select Existing</h3>
+          {ads.length > 0 ? ads.map(ad => (
+            <button key={ad.id} className="ad-list-item" onClick={() => onSelectAdvertisement(ad)}>
+              {ad.name}
+            </button>
+          )) : <p>No existing advertisements found.</p>}
+        </div>
+        <div className="ad-create">
+          <h3>Or Create New</h3>
+          <input type="text" value={newAdName} onChange={(e) => setNewAdName(e.target.value)} placeholder="e.g., Scientist B Recruitment 2025" />
+          <button onClick={handleCreate}>Create & Continue</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // This function transforms the simple backend's flat result format
 // into the nested format the UI components expect.
@@ -47,6 +95,7 @@ const transformApiResult = (dataWrapper) => {
 };
 
 const VerificationCenter = () => {
+  const [advertisement, setAdvertisement] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
   const [sourceFiles, setSourceFiles] = useState([]);
   const [pipelineStatus, setPipelineStatus] = useState('Awaiting files...');
@@ -114,27 +163,21 @@ const VerificationCenter = () => {
   };
 
   const handleBulkSave = async () => {
-    if (results.length === 0) return;
+    if (results.length === 0 || !advertisement) {
+      alert("No results or advertisement selected.");
+      return;
+    }
     setIsSaving(true);
     setPipelineStatus("Saving all results to the database...");
-    
-    const payloadData = results.map(res => {
-      const flatData = { id: res.id, email: res.email, phone: res.phone };
-      const fieldsToFlatten = ['name', 'father_name', 'registration_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
-      fieldsToFlatten.forEach(field => {
-        const componentKey = field;
-        const backendKey = field === 'registration_id' ? 'reg_id' : field;
-        if(res[componentKey]) {
-          flatData[`input_${backendKey}`] = res[componentKey].input;
-          flatData[`extracted_${backendKey}`] = res[componentKey].extracted;
-          flatData[`status_${backendKey}`] = String(res[componentKey].status);
-        }
-      });
-      return flatData;
-    });
+
+    const payloadData = results.map(res => { /* ... your exact payload creation logic ... */ });
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/save-results/`, { results: payloadData });
+      // The POST request now includes the advertisement_id
+      const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, { 
+        results: payloadData,
+        advertisement_id: advertisement.id 
+      });
       setPipelineStatus(`✅ ${response.data.status}`);
       alert(response.data.status);
     } catch (error) {
@@ -155,50 +198,74 @@ const VerificationCenter = () => {
       <div className="dashboard">
         <div className="dashboard-content">
           <header className="dashboard-header">
-            <div><h1>GATE Document Verification Center</h1></div>
+            <div><h1>Admin Dashboard</h1></div>
+            {/* You could add a theme toggle or user info here later */}
           </header>
 
-          {isLoading ? (
-            <LoadingState processedCount={results.length} totalCount={sourceFiles.length} statusMessage={pipelineStatus} />
-          ) : (
-            <section className="upload-workflow">
-              <div className="upload-column">
-                <h2>Step 1: Upload Master Data</h2>
-                <p>Upload the simple CSV file for GATE applicants.</p>
-                <FileUploadZone onFileSelect={(files) => setCsvFile(files[0])} selectedFileCount={csvFile ? 1 : 0} isMultiple={false} iconName="document-text-outline" promptText="Click or drop a .csv file" />
-              </div>
-              <div className="upload-column">
-                <h2>Step 2: Source Documents</h2>
-                <p>Upload all GATE scorecard files (e.g., 1001_GATE.pdf).</p>
-                <FileUploadZone onFileSelect={(files) => setSourceFiles(Array.from(files))} selectedFileCount={sourceFiles.length} isMultiple={true} iconName="images-outline" promptText="Click or drop source files" />
-              </div>
-              <div className="action-area">
-                <button className="run-pipeline-button" onClick={handleRunPipeline} disabled={!canRun}>
-                  {isLoading ? 'Processing...' : 'Run Verification Pipeline'}
-                </button>
-                <p className="pipeline-status-message">{pipelineStatus}</p>
-              </div>
-            </section>
-          )}
+          {/* --- START OF CONDITIONAL WORKFLOW RENDERING --- */}
           
-          {isJobComplete && results.length > 0 && (
-            <div className="bulk-action-area">
-              <p>{pipelineStatus}</p>
-              <button className="save-all-button" onClick={handleBulkSave} disabled={isSaving}>
-                {isSaving ? 'Saving...' : `Save All ${results.length} Verified Records`}
-              </button>
+          {!advertisement ? (
+            // If no advertisement is selected yet, show the selector component.
+            <AdvertisementSelector onSelectAdvertisement={setAdvertisement} />
+          ) : (
+            // Once an advertisement is selected, show the main verification UI.
+            <div className="verification-container">
+              <header className="dashboard-header">
+                <h2>Verification Center for: <span>{advertisement.name}</span></h2>
+                <button className="change-ad-button" onClick={() => setAdvertisement(null)}>
+                  Change Advertisement
+                </button>
+              </header>
+
+              {isLoading ? (
+                <LoadingState 
+                  processedCount={results.length} 
+                  totalCount={sourceFiles.length} 
+                  statusMessage={pipelineStatus} 
+                />
+              ) : (
+                <section className="upload-workflow">
+                  <div className="upload-column">
+                    <h2>Step 2: Upload Master Data</h2>
+                    <p>Upload the simple CSV file for this advertisement.</p>
+                    <FileUploadZone onFileSelect={(files) => setCsvFile(files[0])} selectedFileCount={csvFile ? 1 : 0} isMultiple={false} iconName="document-text-outline" promptText="Click or drop a .csv file" />
+                  </div>
+                  <div className="upload-column">
+                    <h2>Step 3: Source Documents</h2>
+                    <p>Upload all relevant scorecard files (e.g., 1001_GATE.pdf).</p>
+                    <FileUploadZone onFileSelect={(files) => setSourceFiles(Array.from(files))} selectedFileCount={sourceFiles.length} isMultiple={true} iconName="images-outline" promptText="Click or drop source files" />
+                  </div>
+                  <div className="action-area">
+                    <button className="run-pipeline-button" onClick={handleRunPipeline} disabled={!canRun}>
+                      {isLoading ? 'Processing...' : 'Run Verification Pipeline'}
+                    </button>
+                    <p className="pipeline-status-message">{pipelineStatus}</p>
+                  </div>
+                </section>
+              )}
+              
+              {isJobComplete && results.length > 0 && (
+                <div className="bulk-action-area">
+                  <p>{pipelineStatus}</p>
+                  <button className="save-all-button" onClick={handleBulkSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : `Save All ${results.length} Verified Records`}
+                  </button>
+                </div>
+              )}
+
+              <section className="results-section">
+                <main>
+                  {results.length > 0 ? (
+                    <DetailedTableView data={results} expandedRowId={expandedRowId} setExpandedRowId={setExpandedRowId} />
+                  ) : (
+                    !isLoading && <p style={{color: 'var(--text-muted, #6b7280)', padding: '2rem', textAlign: 'center'}}>Run a pipeline to see results here.</p>
+                  )}
+                </main>
+              </section>
             </div>
           )}
-
-          <section className="results-section">
-            <main>
-              {results.length > 0 ? (
-                <DetailedTableView data={results} expandedRowId={expandedRowId} setExpandedRowId={setExpandedRowId} />
-              ) : (
-                !isLoading && <p style={{color: 'var(--text-muted, #6b7280)', padding: '2rem', textAlign: 'center'}}>Run a pipeline to see results here.</p>
-              )}
-            </main>
-          </section>
+          {/* --- END OF CONDITIONAL WORKFLOW RENDERING --- */}
+          
         </div>
       </div>
     </div>

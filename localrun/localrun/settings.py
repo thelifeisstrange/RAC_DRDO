@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'corsheaders', # Moved here for clarity, still high up
     'rest_framework',
     'django_celery_results',
-    'pipeline',  # Your local app
+    'pipeline', 
+    'advertisements', # Your local app
 ]
 
 MIDDLEWARE = [
