@@ -23,17 +23,24 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
       try {
         const response = await axios.get(`${ADVERTISEMENT_API_URL}/`);
         setAds(response.data);
-      } catch (err) { setError('Could not fetch existing advertisements.'); }
+      } catch (err) {
+        setError('Could not fetch existing advertisements.');
+      }
     };
     fetchAds();
   }, []);
 
   const handleCreate = async () => {
-    if (!newAdName.trim()) { setError('Advertisement name cannot be empty.'); return; }
+    if (!newAdName.trim()) {
+      setError('Advertisement name cannot be empty.');
+      return;
+    }
     try {
       const response = await axios.post(`${ADVERTISEMENT_API_URL}/`, { name: newAdName });
-      onSelectAdvertisement(response.data);
-    } catch (err) { setError('Failed to create advertisement.'); }
+      onSelectAdvertisement(response.data); // Pass the newly created ad object up
+    } catch (err) {
+      setError('Failed to create advertisement. Name might already exist.');
+    }
   };
 
   return (
@@ -41,17 +48,24 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
       <div className="advertisement-selector">
         <h2>Step 1: Select or Create Advertisement</h2>
         {error && <p className="error-message">{error}</p>}
+        
         <div className="ad-list">
           <h3>Select Existing</h3>
           {ads.length > 0 ? ads.map(ad => (
             <button key={ad.id} className="ad-list-item" onClick={() => onSelectAdvertisement(ad)}>
               {ad.name}
             </button>
-          )) : <p>No existing advertisements found.</p>}
+          )) : <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No existing advertisements found.</p>}
         </div>
+
         <div className="ad-create">
           <h3>Or Create New</h3>
-          <input type="text" value={newAdName} onChange={(e) => setNewAdName(e.target.value)} placeholder="e.g., Scientist B Recruitment 2025" />
+          <input 
+            type="text" 
+            value={newAdName} 
+            onChange={(e) => setNewAdName(e.target.value)}
+            placeholder="e.g., Scientist B Recruitment 2025" 
+          />
           <button onClick={handleCreate}>Create & Continue</button>
         </div>
       </div>
@@ -163,17 +177,18 @@ const VerificationCenter = () => {
   };
 
   const handleBulkSave = async () => {
-    if (results.length === 0 || !advertisement) {
-      alert("No results or advertisement selected.");
-      return;
-    }
+    if (results.length === 0 || !advertisement) return;
     setIsSaving(true);
     setPipelineStatus("Saving all results to the database...");
 
-    const payloadData = results.map(res => { /* ... your exact payload creation logic ... */ });
+    const payloadData = results.map(res => {
+      const flatData = { id: res.id, email: res.email, phone: res.phone };
+      // ... (Your logic to flatten the 'results' object is correct)
+      return flatData;
+    });
 
     try {
-      // The POST request now includes the advertisement_id
+      // Calls the new, correct API endpoint in the 'advertisements' app
       const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, { 
         results: payloadData,
         advertisement_id: advertisement.id 
@@ -205,14 +220,12 @@ const VerificationCenter = () => {
           {/* --- START OF CONDITIONAL WORKFLOW RENDERING --- */}
           
           {!advertisement ? (
-            // If no advertisement is selected yet, show the selector component.
             <AdvertisementSelector onSelectAdvertisement={setAdvertisement} />
           ) : (
-            // Once an advertisement is selected, show the main verification UI.
             <div className="verification-container">
               <header className="dashboard-header">
                 <h2>Verification Center for: <span>{advertisement.name}</span></h2>
-                <button className="change-ad-button" onClick={() => setAdvertisement(null)}>
+                <button className="change-ad-button" onClick={() => { setAdvertisement(null); setResults([]); setIsLoading(false); }}>
                   Change Advertisement
                 </button>
               </header>

@@ -19,7 +19,9 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
 
     if not isinstance(extracted_data_dict, dict) or not extracted_data_dict:
         error_msg = "PARSE_ERROR: Extracted data is not a valid dictionary."
-        return [file_id, master_row.get('email', 'N/A'), master_row.get('phone', 'N/A'), error_msg] + [''] * 23
+        # On failure, return the error row AND an empty list of failed fields.
+        error_row = [file_id, master_row.get('email', 'N/A'), master_row.get('phone_number', 'N/A'), error_msg] + [''] * 23
+        return error_row, [] 
     
     final_row = [file_id, master_row.get('email', 'N/A'), master_row.get('phone_number', 'N/A')]
     chars_to_strip = string.whitespace + '.,'

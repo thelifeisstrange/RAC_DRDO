@@ -1,6 +1,32 @@
-version: '3.8'
 
 services:
+
+  db:
+    image: mysql:8.0
+    container_name: verification_db_mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql_init:/docker-entrypoint-initdb.d
+    ports:
+      - "3307:3306"
+    
+    # --- START OF THE CRITICAL FIX ---
+    environment:
+      # Use the correct variable to set the root user's password.
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      
+      # These two variables will now be used to create a separate,
+      # non-root user that your Django application will connect with. This is a best practice.
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # --- END OF THE CRITICAL FIX ---
+      
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+
   # The Redis service
   redis:
     image: redis:6.2-alpine # Use a specific, lightweight version of Redis
@@ -39,5 +65,6 @@ services:
       - redis # Also depends on Redis
 
 volumes:
+  mysql_data:
   redis_data:
   media_volume:

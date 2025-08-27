@@ -25,4 +25,6 @@ requests
 opencv-python-headless
 pytesseract
 
+mysqlclient
+
 
