@@ -142,6 +142,7 @@ const VerificationCenter = () => {
         if (jobStatus === 'COMPLETE' || jobStatus === 'FAILED') {
           clearInterval(pollingIntervalRef.current);
           setIsLoading(false);
+          setIsJobComplete(true); 
           const finalMessage = jobStatus === 'COMPLETE' ? `✅ Process complete!` : `❌ Process failed.`;
           setPipelineStatus(finalMessage);
         }
@@ -182,8 +183,30 @@ const VerificationCenter = () => {
     setPipelineStatus("Saving all results to the database...");
 
     const payloadData = results.map(res => {
-      const flatData = { id: res.id, email: res.email, phone: res.phone };
-      // ... (Your logic to flatten the 'results' object is correct)
+      const flatData = {
+        id: res.id,
+        email: res.email,
+        phone: res.phone,
+      };
+
+      // Define the fields to loop through to flatten the nested data
+      const fieldsToFlatten = [
+        'name', 'father_name', 'registration_id', 'year', 
+        'paper_code', 'score', 'scoreof100', 'rank'
+      ];
+      
+      fieldsToFlatten.forEach(field => {
+        // 'field' here is the key in the nested 'res' object (e.g., 'registration_id')
+        if (res[field]) {
+          // The key for the Django model field (e.g., 'reg_id')
+          const backendKey = field === 'registration_id' ? 'reg_id' : field;
+          
+          // Construct the keys for the payload to match the ParsedResult model fields
+          flatData[`input_${backendKey}`] = res[field].input;
+          flatData[`extracted_${backendKey}`] = res[field].extracted;
+          flatData[`${backendKey}_status`] = String(res[field].status);
+        }
+      });
       return flatData;
     });
 

@@ -79,3 +79,35 @@ class SaveAdvertisementResultsAPIView(APIView):
             return Response({'error': f'Advertisement with ID {advertisement_id} not found.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': f'An unexpected server error occurred: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class BulkSaveResultsAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        advertisement_id = request.data.get('advertisement_id')
+        results_list = request.data.get('results', [])
+
+        if not advertisement_id:
+            return Response({'error': 'Advertisement ID is required.'}, status=400)
+        
+        try:
+            advertisement = Advertisement.objects.get(id=advertisement_id)
+        except Advertisement.DoesNotExist:
+            return Response({'error': 'Advertisement not found.'}, status=404)
+
+        # --- THE NEW ORCHESTRATION LOGIC ---
+        table_name = advertisement.get_results_table_name()
+        
+        # Step 1: Create the dynamic table for this advertisement
+        table_created, error = create_results_table_for_advertisement(table_name)
+        if not table_created:
+            return Response({'error': f'Database error: {error}'}, status=500)
+            
+        # Step 2: Save the data to the newly created table
+        saved_count, errors = save_results_to_table(table_name, results_list)
+        
+        if errors:
+            return Response({
+                'status': f'Partial success. Saved {saved_count} results.',
+                'errors': errors
+            }, status=207)
+
+        return Response({'status': f'Successfully saved {saved_count} results to new table {table_name}.'}, status=200)

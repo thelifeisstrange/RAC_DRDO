@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import ParsedResult, VerificationJob, VerificationResult # Use the simple models
+from .models import VerificationJob, VerificationResult # Use the simple models
 from .tasks import run_verification_pipeline
 from .serializers import VerificationJobSerializer
 
