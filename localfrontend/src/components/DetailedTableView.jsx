@@ -48,12 +48,12 @@ const DetailedTableView = ({ data, expandedRowId, setExpandedRowId }) => {
     const fieldLabels = { 
         name: 'Name', 
         father_name: 'Father Name',
-        registration_id: 'Registration ID', 
+        registration_id: 'Registration Number', 
         year: 'Year',
         paper_code: 'Paper Code',
-        score: 'Score', 
-        scoreof100: 'Score of 100', 
-        rank: 'Rank' 
+        score: 'GATE Score', 
+        scoreof100: 'GATE Mark', 
+        rank: 'GATE Rank' 
     };
 
     return (

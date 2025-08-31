@@ -5,8 +5,6 @@
 # This structure is based on the ParsedResult model you defined.
 PARSED_RESULT_FIELDS_BLUEPRINT = {
     "id": "VARCHAR(50) PRIMARY KEY",
-    "email": "VARCHAR(255)",
-    "phone": "VARCHAR(50)",
     "input_name": "TEXT",
     "extracted_name": "TEXT",
     "name_status": "VARCHAR(10)",

@@ -83,8 +83,6 @@ const transformApiResult = (dataWrapper) => {
     id: data.id || 'N/A',
     sourceFile: data.id ? `${data.id}_GATE` : 'Unknown File',
     status: data.extracted_name === 'COMPRESSION_FAILED' ? 'Failed' : 'Complete',
-    email: data.email,
-    phone: data.phone
   };
 
   let matches = 0;
@@ -184,9 +182,7 @@ const VerificationCenter = () => {
 
     const payloadData = results.map(res => {
       const flatData = {
-        id: res.id,
-        email: res.email,
-        phone: res.phone,
+        applicant_id: res.id,
       };
 
       // Define the fields to loop through to flatten the nested data

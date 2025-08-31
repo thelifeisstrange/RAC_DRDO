@@ -28,7 +28,7 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
         if master_df is None: raise Exception("Failed to load master data.")
 
         final_headers = [
-            'id', 'email', 'phone', 
+            'id', 
             'input_name', 'extracted_name', 'name_status',
             'input_father_name', 'extracted_father_name', 'father_name_status',
             'input_reg_id', 'extracted_reg_id', 'reg_id_status', 
@@ -68,7 +68,7 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
             # --- END OF THE FIX ---
             
             if not compressed_path:
-                result_row_list = [file_name.split('_')[0], 'N/A', 'N/A', 'N/A', 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 6)
+                result_row_list = [file_name.split('_')[0], 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 3)
             else:
 
                 orientation_success = correct_orientation_in_place(compressed_path)

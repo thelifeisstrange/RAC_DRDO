@@ -14,8 +14,7 @@ def load_and_prepare_csv(file_path: str) -> pd.DataFrame:
         
         # Define the base names for the columns we know about.
         base_column_names = [
-            'id', 'email', 'name', 'father_name', 'phone', 'registration_id', 'year', 'paper_code',
-            'score', 'scoreof100', 'rank'
+            'basic_id', 'name', 'father_name', 'mother_name', 'dob', 'category', 'gate_year', 'registration_number', 'gate_paper_code', 'gate_valid_score', 'gate_mark', 'gate_rank', 'degree_name', 'subject_name', 'university_name', 'percentage', 'cgpa_calculation', 'passing_year', 'degree_division'
         ]
         
         # Get the actual number of columns found in the CSV file.
@@ -38,12 +37,12 @@ def load_and_prepare_csv(file_path: str) -> pd.DataFrame:
         # Now we only strip whitespace and do NOT convert to lowercase.
         df_prepared = df.apply(lambda x: x.str.strip())
         
-        if 'id' in df_prepared.columns:
-            df_prepared = df_prepared.set_index('id')
+        if 'basic_id' in df_prepared.columns:
+            df_prepared = df_prepared.set_index('basic_id')
             print("-> Master data loaded and prepared successfully (original case preserved).")
             return df_prepared
         else:
-            print("Error: 'id' column not found in the master CSV.")
+            print("Error: 'basic_id' column not found in the master CSV.")
             return None
 
     except FileNotFoundError:

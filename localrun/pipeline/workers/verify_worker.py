@@ -19,11 +19,11 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
 
     if not isinstance(extracted_data_dict, dict) or not extracted_data_dict:
         error_msg = "PARSE_ERROR: Extracted data is not a valid dictionary."
-        # On failure, return the error row AND an empty list of failed fields.
-        error_row = [file_id, master_row.get('email', 'N/A'), master_row.get('phone_number', 'N/A'), error_msg] + [''] * 23
+        # The final row needs 1 (id) + 1 (error) + 24 blank fields
+        error_row = [file_id, error_msg] + [''] * 24
         return error_row, [] 
     
-    final_row = [file_id, master_row.get('email', 'N/A'), master_row.get('phone_number', 'N/A')]
+    final_row = [file_id,]
     chars_to_strip = string.whitespace + '.,'
 
     failed_fields = []
@@ -32,12 +32,12 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
     fields_to_compare = {
         'name': 'name',
         'father_name': 'father_name',
-        'registration_id': 'registration_id',
-        'year': 'year',
-        'paper_code': 'paper_code',
-        'score': 'score',
-        'scoreof100': 'scoreof100',
-        'rank': 'rank'
+        'registration_id': 'registration_number',
+        'year': 'gate_year',
+        'paper_code': 'gate_paper_code',
+        'score': 'gate_valid_score',
+        'scoreof100': 'gate_mark',
+        'rank': 'gate_rank'
     }
 
     for report_field, master_data_field in fields_to_compare.items():
