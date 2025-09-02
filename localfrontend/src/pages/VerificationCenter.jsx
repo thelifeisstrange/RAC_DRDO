@@ -6,6 +6,7 @@ import './VerificationCenter.css';
 
 // --- THE CRITICAL FIX: Correct the import paths to match your file structure ---
 import FileUploadZone from '../components/FileUploadZone';
+// import FolderPathInput from '../components/FolderPathInput';
 import LoadingState from '../components/LoadingState';
 import DetailedTableView from '../components/DetailedTableView';
 // We are NOT importing from '../components/dashboard/...'
@@ -109,7 +110,8 @@ const transformApiResult = (dataWrapper) => {
 const VerificationCenter = () => {
   const [advertisement, setAdvertisement] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
-  const [sourceFiles, setSourceFiles] = useState([]);
+  const [sourceFolderPath, setSourceFolderPath] = useState('');
+  const [totalFiles, setTotalFiles] = useState(0); 
   const [pipelineStatus, setPipelineStatus] = useState('Awaiting files...');
   const [isLoading, setIsLoading] = useState(false);
   const [jobId, setJobId] = useState(null);
@@ -128,13 +130,22 @@ const VerificationCenter = () => {
         // --- THE CRITICAL FIX ---
         // The API response is a flat object. We access its properties directly.
         const jobStatus = response.data.status;
+        const jobDetails = response.data.details; 
         const apiResults = response.data.results; // This is the array of { "data": {...} } objects
         
         // It's safe to map an empty array, this will result in an empty array.
         const transformedResults = apiResults.map(transformApiResult);
         setResults(transformedResults);
+
+        if (jobDetails && jobDetails.includes('files to process')) {
+            const countMatch = jobDetails.match(/(\d+)/);
+            if (countMatch) {
+                setTotalFiles(parseInt(countMatch[0], 10));
+            }
+        }
         
-        setPipelineStatus(`Processing... ${transformedResults.length} / ${sourceFiles.length} files complete.`);
+        const statusText = `Processing... ${transformedResults.length} / ${totalFiles} files complete.`;
+        setPipelineStatus(statusText);
         
         // Check the jobStatus variable, not a non-existent 'job' object.
         if (jobStatus === 'COMPLETE' || jobStatus === 'FAILED') {
@@ -157,10 +168,11 @@ const VerificationCenter = () => {
     setIsJobComplete(false);
     const formData = new FormData();
     formData.append('master_csv', csvFile);
-    sourceFiles.forEach(file => formData.append('source_files', file));
+    formData.append('source_folder_path', sourceFolderPath);
     setIsLoading(true);
     setResults([]);
     setJobId(null);
+    setTotalFiles(0);
     if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     setPipelineStatus('Uploading files and starting job...');
     try {
@@ -225,7 +237,7 @@ const VerificationCenter = () => {
 
   useEffect(() => () => { if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current); }, []);
 
-  const canRun = csvFile && sourceFiles.length > 0 && !isLoading;
+  const canRun = csvFile && sourceFolderPath.trim() !== '' && !isLoading;
 
   return (
     <div className="verification-center-wrapper">
@@ -250,12 +262,9 @@ const VerificationCenter = () => {
               </header>
 
               {isLoading ? (
-                <LoadingState 
-                  processedCount={results.length} 
-                  totalCount={sourceFiles.length} 
-                  statusMessage={pipelineStatus} 
-                />
-              ) : (
+            // The totalCount is now dynamic
+            <LoadingState processedCount={results.length} totalCount={totalFiles} statusMessage={pipelineStatus} />
+          ) : (
                 <section className="upload-workflow">
                   <div className="upload-column">
                     <h2>Step 2: Upload Master Data</h2>
@@ -263,9 +272,15 @@ const VerificationCenter = () => {
                     <FileUploadZone onFileSelect={(files) => setCsvFile(files[0])} selectedFileCount={csvFile ? 1 : 0} isMultiple={false} iconName="document-text-outline" promptText="Click or drop a .csv file" />
                   </div>
                   <div className="upload-column">
-                    <h2>Step 3: Source Documents</h2>
-                    <p>Upload all relevant scorecard files (e.g., 1001_GATE.pdf).</p>
-                    <FileUploadZone onFileSelect={(files) => setSourceFiles(Array.from(files))} selectedFileCount={sourceFiles.length} isMultiple={true} iconName="images-outline" promptText="Click or drop source files" />
+                    <h2>Step 3: Specify Source Folder</h2>
+                    <p>Provide the full server-side path to the dataset folder.</p>
+                    <input
+                      type="text"
+                      className="folder-path-input"
+                      placeholder="/path/on/server/to/dataset"
+                      value={sourceFolderPath}
+                      onChange={(e) => setSourceFolderPath(e.target.value)}
+                    />
                   </div>
                   <div className="action-area">
                     <button className="run-pipeline-button" onClick={handleRunPipeline} disabled={!canRun}>

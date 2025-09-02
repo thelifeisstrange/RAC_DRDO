@@ -16,10 +16,20 @@ class StartVerificationAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         master_csv = request.FILES.get('master_csv')
-        source_files = request.FILES.getlist('source_files')
+        source_folder_path = request.data.get('source_folder_path')
 
-        if not master_csv or not source_files:
-            return Response({'error': 'Master CSV and source files are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not master_csv or not source_folder_path:
+            return Response({'error': 'Master CSV and source folder path are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        allowed_base_path = os.path.abspath('/data') # Example: allows '.../media/../datasets'
+        user_path = os.path.abspath(source_folder_path)
+
+        if not user_path.startswith(allowed_base_path):
+            print(f"SECURITY ALERT: User tried to access forbidden path: {user_path}")
+            return Response({'error': 'The provided path is not within the shared data volume.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if not os.path.isdir(user_path):
+            return Response({'error': f'The provided path does not exist or is not a directory inside the container: {user_path}'}, status=status.HTTP_400_BAD_REQUEST)
 
         job = VerificationJob.objects.create()
         upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', str(job.id))
@@ -30,15 +40,15 @@ class StartVerificationAPIView(APIView):
         with open(master_csv_path, 'wb+') as f:
             for chunk in master_csv.chunks(): f.write(chunk)
 
-        source_file_paths = []
-        for f in source_files:
-            path = os.path.join(upload_dir, f.name)
-            with open(path, 'wb+') as destination:
-                for chunk in f.chunks(): destination.write(chunk)
-            source_file_paths.append(path)
+        # source_file_paths = []
+        # for f in source_files:
+        #     path = os.path.join(upload_dir, f.name)
+        #     with open(path, 'wb+') as destination:
+        #         for chunk in f.chunks(): destination.write(chunk)
+        #     source_file_paths.append(path)
         
         # Call the task with all the necessary paths
-        run_verification_pipeline.delay(job.id, master_csv_path, source_file_paths)
+        run_verification_pipeline.delay(job.id, master_csv_path, source_folder_path)
 
         serializer = VerificationJobSerializer(job)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

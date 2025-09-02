@@ -4,6 +4,8 @@ import shutil
 from celery import shared_task
 from django.conf import settings
 
+# from localrun.pipeline.workers.scanner_worker import scan_for_gate_scorecards
+
 from .models import VerificationJob, VerificationResult# Use the simple Result model
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
@@ -11,10 +13,11 @@ from .workers.local_extract_worker import extract_and_parse, extract_single_fiel
 # from .workers.extract_worker import extract_and_parse, extract_single_field, initialize_client
 from .workers.verify_worker import verify_and_create_row # Use the simple verify function
 from .workers.derive_worker import derive_paper_code
+from .workers.scanner_worker import scan_for_gate_scorecards
 from .workers.orientation_worker import correct_orientation_in_place
 
 @shared_task
-def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
+def run_verification_pipeline(job_id, master_csv_path, source_folder_path):
     job = VerificationJob.objects.get(id=job_id)
     job.status = 'PROCESSING'
     job.save()
@@ -24,11 +27,21 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
 
     try:
         # initialize_client()
+
+        files_to_process = scan_for_gate_scorecards(source_folder_path)
+
+        for applicant_id, file_path in files_to_process.items():
+            file_name = os.path.basename(file_path)
+
+        if not files_to_process:
+            raise Exception("Scanner did not find any valid gate_scorecard files.")
+        
+        
         master_df = load_and_prepare_csv(master_csv_path)
         if master_df is None: raise Exception("Failed to load master data.")
 
         final_headers = [
-            'id', 
+            'id',
             'input_name', 'extracted_name', 'name_status',
             'input_father_name', 'extracted_father_name', 'father_name_status',
             'input_reg_id', 'extracted_reg_id', 'reg_id_status', 
@@ -57,7 +70,7 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
             Output Format Example:
             John Doe,Robert Doe,CS24S21098765,2024,850,85.50,123"""
 
-        for file_path in source_file_paths:
+        for applicant_id, file_path in files_to_process.items():
             file_name = os.path.basename(file_path)
             # --- START OF THE FIX ---
             # We now capture the second return value into a variable named 'compress_msg'
@@ -81,13 +94,12 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
                 
                 # Step 2: Initial verification
                 # We will re-run this later if a retry happens.
-                _, failed_fields = verify_and_create_row(master_df, file_path, extracted_dict)
+                _, failed_fields = verify_and_create_row(master_df, applicant_id, extracted_dict)
 
                 # Step 3: Check for registration_id failure and trigger retry
                 if 'registration_id' in failed_fields:
                     print(f"[RETRY LOGIC] Registration ID failed for {file_name}. Triggering focused extraction.")
-                    
-                    applicant_id = file_name.split('_')[0]
+                
                     master_row = master_df.loc[applicant_id]
                     candidate_name_hint = master_row.get('name', '')
                     
@@ -102,7 +114,7 @@ def run_verification_pipeline(job_id, master_csv_path, source_file_paths):
                 final_extracted_dict = derive_paper_code(extracted_dict)
 
                 # Step 5: Run the final verification on the fully populated dictionary to get the final report row
-                result_row_list, _ = verify_and_create_row(master_df, file_path, final_extracted_dict)
+                result_row_list, _ = verify_and_create_row(master_df, applicant_id, final_extracted_dict)
 
             
             result_dict = dict(zip(final_headers, result_row_list))

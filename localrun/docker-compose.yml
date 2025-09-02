@@ -7,6 +7,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql_init:/docker-entrypoint-initdb.d
+
     ports:
       - "3307:3306"
     
@@ -44,6 +45,7 @@ services:
     volumes:
       - .:/app # Mount your local code into the container for live-reloading
       - media_volume:/app/media # Persist uploaded files
+      - ../docker_data:/data
     ports:
       - "8000:8000" # Map container port 8000 to host port 8000
     env_file:
@@ -58,7 +60,8 @@ services:
     command: celery -A localrun worker -l info # The command to start the worker
     volumes:
       - .:/app # Mount local code for live-reloading
-      - media_volume:/app/media # Share the same media volume
+      - media_volume:/app/media 
+      - ../docker_data:/data
     env_file:
       - .env # Pass the same environment variables
     depends_on:

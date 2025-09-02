@@ -3,31 +3,30 @@ import os
 import string
 import pandas as pd
 
-# The function name is kept the same to avoid import errors in your existing tasks.py
-def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
+# --- THE CRITICAL CHANGE: The function now accepts applicant_id directly ---
+def verify_and_create_row(master_df, applicant_id, extracted_data_dict):
     """
-    Verifies a single file and creates a flat list for the final report.
-    This version is updated to handle the new father_name and paper_code fields.
+    Verifies a single file's data and creates a flat list for the final report.
+    It now receives the applicant_id directly instead of parsing it from a filename.
     """
-    base_name = os.path.splitext(os.path.basename(source_file_path))[0]
-    file_id = base_name.split('_')[0]
+    
+    # We no longer need to parse the ID. We use the one passed in.
+    file_id = str(applicant_id)
 
     if file_id not in master_df.index:
-        return [file_id, 'ID NOT FOUND IN MASTER CSV'] + [''] * 25
+        error_row = [file_id, 'ID NOT FOUND IN MASTER CSV'] + [''] * 24
+        return error_row, []
 
     master_row = master_df.loc[file_id]
 
     if not isinstance(extracted_data_dict, dict) or not extracted_data_dict:
         error_msg = "PARSE_ERROR: Extracted data is not a valid dictionary."
-        # The final row needs 1 (id) + 1 (error) + 24 blank fields
         error_row = [file_id, error_msg] + [''] * 24
         return error_row, [] 
     
-    final_row = [file_id,]
+    final_row = [file_id]
     chars_to_strip = string.whitespace + '.,'
-
     failed_fields = []
-
 
     fields_to_compare = {
         'name': 'name',
@@ -49,9 +48,8 @@ def verify_and_create_row(master_df, source_file_path, extracted_data_dict):
         
         status = "True" if (compare_input == compare_extracted and compare_input != '') else "False"
 
-        # NEW: If the status is False, add the field name to our tracking list.
         if status == "False":
-            failed_fields.append(report_field) # Use the key, e.g., 'registration_id'
+            failed_fields.append(report_field)
         
         final_row.extend([input_val if pd.notna(input_val) else 'n/a', extracted_val, status])
                 
