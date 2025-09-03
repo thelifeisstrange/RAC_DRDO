@@ -1,7 +1,6 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import './VerificationCenter.css';
 
 import FileUploadZone from '../components/FileUploadZone';
@@ -14,7 +13,6 @@ const ADVERTISEMENT_API_URL = 'http://127.0.0.1:8000/api/advertisements';
 const AdvertisementSelector = ({ onSelectAdvertisement }) => {
   const [ads, setAds] = useState([]);
   const [newAdName, setNewAdName] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -22,7 +20,7 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
         const response = await axios.get(`${ADVERTISEMENT_API_URL}/`);
         setAds(response.data);
       } catch (err) {
-        setError('Could not fetch existing advertisements.');
+        toast.error('Could not fetch existing advertisements.');
       }
     };
     fetchAds();
@@ -30,14 +28,15 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
 
   const handleCreate = async () => {
     if (!newAdName.trim()) {
-      setError('Advertisement name cannot be empty.');
+      toast.error('Advertisement name cannot be empty.');
       return;
     }
     try {
       const response = await axios.post(`${ADVERTISEMENT_API_URL}/`, { name: newAdName });
+      toast.success(`Advertisement '${response.data.name}' created!`);
       onSelectAdvertisement(response.data);
     } catch (err) {
-      setError('Failed to create advertisement. Name might already exist.');
+      toast.error('Failed to create advertisement. Name might already exist.');
     }
   };
 
@@ -45,7 +44,6 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
       <div className="advertisement-selector-wrapper">
         <div className="advertisement-selector">
           <h2>Step 1: Select or Create Advertisement</h2>
-          {error && <p className="error-message">{error}</p>}
 
           <div className="ad-list">
             <h3>Select Existing</h3>
@@ -70,6 +68,7 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
       </div>
   );
 };
+
 
 const transformApiResult = (dataWrapper) => {
   const data = dataWrapper.data;
@@ -204,11 +203,11 @@ const VerificationCenter = () => {
         advertisement_id: advertisement.id
       });
       setPipelineStatus(`✅ ${response.data.status}`);
-      alert(response.data.status);
+      toast.success(response.data.status);
     } catch (error) {
       console.error("Failed to save results:", error.response?.data || error);
       setPipelineStatus("❌ Error saving results. Check the console.");
-      alert("Error: Could not save results.");
+      toast.error("Error: Could not save results.");
     } finally {
       setIsSaving(false);
     }
@@ -303,4 +302,4 @@ const VerificationCenter = () => {
   );
 };
 
-export default VerificationCenter;;
+export default VerificationCenter;
