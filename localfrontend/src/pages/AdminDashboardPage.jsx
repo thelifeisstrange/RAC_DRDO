@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 
-
 import './DashboardPage.css';
 import './AdminDashboardPage.css';
 
-import Sidebar from '../components/Sidebar.jsx';
-import VerificationCenter from './VerificationCenter.jsx';
+import Sidebar from '../components/Sidebar';
+import VerificationCenter from './VerificationCenter';
 
 const AdminDashboardPage = () => {
-
     const [activeView, setActiveView] = useState('screening');
 
     const renderActiveView = () => {
@@ -16,7 +14,6 @@ const AdminDashboardPage = () => {
             case 'screening':
                 return <VerificationCenter />;
             default:
-                // You can return a default view or a placeholder here
                 return <div>Please select a view from the sidebar.</div>;
         }
     };
@@ -36,7 +33,6 @@ const AdminDashboardPage = () => {
                     {renderActiveView()}
                 </main>
             </div>
-            
         </div>
     );
 };

@@ -1,15 +1,12 @@
-// src/pages/VerificationCenter.jsx
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './VerificationCenter.css';
 
-// --- THE CRITICAL FIX: Correct the import paths to match your file structure ---
 import FileUploadZone from '../components/FileUploadZone';
-// import FolderPathInput from '../components/FolderPathInput';
 import LoadingState from '../components/LoadingState';
 import DetailedTableView from '../components/DetailedTableView';
-// We are NOT importing from '../components/dashboard/...'
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api/pipeline';
 const ADVERTISEMENT_API_URL = 'http://127.0.0.1:8000/api/advertisements';
@@ -38,45 +35,42 @@ const AdvertisementSelector = ({ onSelectAdvertisement }) => {
     }
     try {
       const response = await axios.post(`${ADVERTISEMENT_API_URL}/`, { name: newAdName });
-      onSelectAdvertisement(response.data); // Pass the newly created ad object up
+      onSelectAdvertisement(response.data);
     } catch (err) {
       setError('Failed to create advertisement. Name might already exist.');
     }
   };
 
   return (
-    <div className="advertisement-selector-wrapper">
-      <div className="advertisement-selector">
-        <h2>Step 1: Select or Create Advertisement</h2>
-        {error && <p className="error-message">{error}</p>}
-        
-        <div className="ad-list">
-          <h3>Select Existing</h3>
-          {ads.length > 0 ? ads.map(ad => (
-            <button key={ad.id} className="ad-list-item" onClick={() => onSelectAdvertisement(ad)}>
-              {ad.name}
-            </button>
-          )) : <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No existing advertisements found.</p>}
-        </div>
+      <div className="advertisement-selector-wrapper">
+        <div className="advertisement-selector">
+          <h2>Step 1: Select or Create Advertisement</h2>
+          {error && <p className="error-message">{error}</p>}
 
-        <div className="ad-create">
-          <h3>Or Create New</h3>
-          <input 
-            type="text" 
-            value={newAdName} 
-            onChange={(e) => setNewAdName(e.target.value)}
-            placeholder="e.g., Scientist B Recruitment 2025" 
-          />
-          <button onClick={handleCreate}>Create & Continue</button>
+          <div className="ad-list">
+            <h3>Select Existing</h3>
+            {ads.length > 0 ? ads.map(ad => (
+                <button key={ad.id} className="ad-list-item" onClick={() => onSelectAdvertisement(ad)}>
+                  {ad.name}
+                </button>
+            )) : <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No existing advertisements found.</p>}
+          </div>
+
+          <div className="ad-create">
+            <h3>Or Create New</h3>
+            <input
+                type="text"
+                value={newAdName}
+                onChange={(e) => setNewAdName(e.target.value)}
+                placeholder="e.g., Scientist B Recruitment 2025"
+            />
+            <button onClick={handleCreate}>Create & Continue</button>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 
-
-// This function transforms the simple backend's flat result format
-// into the nested format the UI components expect.
 const transformApiResult = (dataWrapper) => {
   const data = dataWrapper.data;
   const fields = ['name', 'father_name', 'reg_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
@@ -111,7 +105,7 @@ const VerificationCenter = () => {
   const [advertisement, setAdvertisement] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
   const [sourceFolderPath, setSourceFolderPath] = useState('');
-  const [totalFiles, setTotalFiles] = useState(0); 
+  const [totalFiles, setTotalFiles] = useState(0);
   const [pipelineStatus, setPipelineStatus] = useState('Awaiting files...');
   const [isLoading, setIsLoading] = useState(false);
   const [jobId, setJobId] = useState(null);
@@ -123,35 +117,29 @@ const VerificationCenter = () => {
 
   const pollJobStatus = (id) => {
     if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+
     pollingIntervalRef.current = setInterval(async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/status/${id}/`);
-        
-        // --- THE CRITICAL FIX ---
-        // The API response is a flat object. We access its properties directly.
-        const jobStatus = response.data.status;
-        const jobDetails = response.data.details; 
-        const apiResults = response.data.results; // This is the array of { "data": {...} } objects
-        
-        // It's safe to map an empty array, this will result in an empty array.
+        const { status: jobStatus, details: jobDetails, results: apiResults = [] } = response.data;
+
         const transformedResults = apiResults.map(transformApiResult);
         setResults(transformedResults);
 
         if (jobDetails && jobDetails.includes('files to process')) {
-            const countMatch = jobDetails.match(/(\d+)/);
-            if (countMatch) {
-                setTotalFiles(parseInt(countMatch[0], 10));
-            }
+          const countMatch = jobDetails.match(/(\d+)/);
+          if (countMatch) {
+            setTotalFiles(parseInt(countMatch[0], 10));
+          }
         }
-        
+
         const statusText = `Processing... ${transformedResults.length} / ${totalFiles} files complete.`;
         setPipelineStatus(statusText);
-        
-        // Check the jobStatus variable, not a non-existent 'job' object.
+
         if (jobStatus === 'COMPLETE' || jobStatus === 'FAILED') {
           clearInterval(pollingIntervalRef.current);
           setIsLoading(false);
-          setIsJobComplete(true); 
+          setIsJobComplete(true);
           const finalMessage = jobStatus === 'COMPLETE' ? `✅ Process complete!` : `❌ Process failed.`;
           setPipelineStatus(finalMessage);
         }
@@ -169,12 +157,15 @@ const VerificationCenter = () => {
     const formData = new FormData();
     formData.append('master_csv', csvFile);
     formData.append('source_folder_path', sourceFolderPath);
+
     setIsLoading(true);
     setResults([]);
     setJobId(null);
     setTotalFiles(0);
     if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+
     setPipelineStatus('Uploading files and starting job...');
+
     try {
       const response = await axios.post(`${API_BASE_URL}/start/`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       const newJobId = response.data.id;
@@ -193,23 +184,12 @@ const VerificationCenter = () => {
     setPipelineStatus("Saving all results to the database...");
 
     const payloadData = results.map(res => {
-      const flatData = {
-        applicant_id: res.id,
-      };
+      const flatData = { applicant_id: res.id };
+      const fieldsToFlatten = ['name', 'father_name', 'registration_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
 
-      // Define the fields to loop through to flatten the nested data
-      const fieldsToFlatten = [
-        'name', 'father_name', 'registration_id', 'year', 
-        'paper_code', 'score', 'scoreof100', 'rank'
-      ];
-      
       fieldsToFlatten.forEach(field => {
-        // 'field' here is the key in the nested 'res' object (e.g., 'registration_id')
         if (res[field]) {
-          // The key for the Django model field (e.g., 'reg_id')
           const backendKey = field === 'registration_id' ? 'reg_id' : field;
-          
-          // Construct the keys for the payload to match the ParsedResult model fields
           flatData[`input_${backendKey}`] = res[field].input;
           flatData[`extracted_${backendKey}`] = res[field].extracted;
           flatData[`${backendKey}_status`] = String(res[field].status);
@@ -219,10 +199,9 @@ const VerificationCenter = () => {
     });
 
     try {
-      // Calls the new, correct API endpoint in the 'advertisements' app
-      const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, { 
+      const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, {
         results: payloadData,
-        advertisement_id: advertisement.id 
+        advertisement_id: advertisement.id
       });
       setPipelineStatus(`✅ ${response.data.status}`);
       alert(response.data.status);
@@ -235,88 +214,93 @@ const VerificationCenter = () => {
     }
   };
 
-  useEffect(() => () => { if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current); }, []);
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  const handleResetView = () => {
+    setAdvertisement(null);
+    setResults([]);
+    setIsLoading(false);
+    setIsJobComplete(false);
+    setCsvFile(null);
+    setSourceFolderPath('');
+  };
 
   const canRun = csvFile && sourceFolderPath.trim() !== '' && !isLoading;
 
   return (
-    <div className="verification-center-wrapper">
-      <div className="dashboard">
-        <div className="dashboard-content">
-          <header className="dashboard-header">
-            <div><h1>Admin Dashboard</h1></div>
-            {/* You could add a theme toggle or user info here later */}
-          </header>
-
-          {/* --- START OF CONDITIONAL WORKFLOW RENDERING --- */}
-          
-          {!advertisement ? (
-            <AdvertisementSelector onSelectAdvertisement={setAdvertisement} />
-          ) : (
-            <div className="verification-container">
-              <header className="dashboard-header">
-                <h2>Verification Center for: <span>{advertisement.name}</span></h2>
-                <button className="change-ad-button" onClick={() => { setAdvertisement(null); setResults([]); setIsLoading(false); }}>
-                  Change Advertisement
-                </button>
-              </header>
-
-              {isLoading ? (
-            // The totalCount is now dynamic
-            <LoadingState processedCount={results.length} totalCount={totalFiles} statusMessage={pipelineStatus} />
-          ) : (
-                <section className="upload-workflow">
-                  <div className="upload-column">
-                    <h2>Step 2: Upload Master Data</h2>
-                    <p>Upload the simple CSV file for this advertisement.</p>
-                    <FileUploadZone onFileSelect={(files) => setCsvFile(files[0])} selectedFileCount={csvFile ? 1 : 0} isMultiple={false} iconName="document-text-outline" promptText="Click or drop a .csv file" />
-                  </div>
-                  <div className="upload-column">
-                    <h2>Step 3: Specify Source Folder</h2>
-                    <p>Provide the full server-side path to the dataset folder.</p>
-                    <input
-                      type="text"
-                      className="folder-path-input"
-                      placeholder="/path/on/server/to/dataset"
-                      value={sourceFolderPath}
-                      onChange={(e) => setSourceFolderPath(e.target.value)}
-                    />
-                  </div>
-                  <div className="action-area">
-                    <button className="run-pipeline-button" onClick={handleRunPipeline} disabled={!canRun}>
-                      {isLoading ? 'Processing...' : 'Run Verification Pipeline'}
+      <div className="verification-center-wrapper">
+        <div className="dashboard">
+          <div className="dashboard-content">
+            {!advertisement ? (
+                <AdvertisementSelector onSelectAdvertisement={setAdvertisement} />
+            ) : (
+                <div className="verification-container">
+                  <header className="dashboard-header">
+                    <h2>Verification Center for: <span>{advertisement.name}</span></h2>
+                    <button className="change-ad-button" onClick={handleResetView}>
+                      Change Advertisement
                     </button>
-                    <p className="pipeline-status-message">{pipelineStatus}</p>
-                  </div>
-                </section>
-              )}
-              
-              {isJobComplete && results.length > 0 && (
-                <div className="bulk-action-area">
-                  <p>{pipelineStatus}</p>
-                  <button className="save-all-button" onClick={handleBulkSave} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : `Save All ${results.length} Verified Records`}
-                  </button>
-                </div>
-              )}
+                  </header>
 
-              <section className="results-section">
-                <main>
-                  {results.length > 0 ? (
-                    <DetailedTableView data={results} expandedRowId={expandedRowId} setExpandedRowId={setExpandedRowId} />
+                  {isLoading ? (
+                      <LoadingState processedCount={results.length} totalCount={totalFiles} statusMessage={pipelineStatus} />
                   ) : (
-                    !isLoading && <p style={{color: 'var(--text-muted, #6b7280)', padding: '2rem', textAlign: 'center'}}>Run a pipeline to see results here.</p>
+                      <section className="upload-workflow">
+                        <div className="upload-column">
+                          <h2>Step 2: Upload Master Data</h2>
+                          <p>Upload the simple CSV file for this advertisement.</p>
+                          <FileUploadZone onFileSelect={(files) => setCsvFile(files[0])} selectedFileCount={csvFile ? 1 : 0} isMultiple={false} iconName="document-text-outline" promptText="Click or drop a .csv file" selectedFiles={csvFile ? [csvFile] : []} />
+                        </div>
+                        <div className="upload-column">
+                          <h2>Step 3: Specify Source Folder</h2>
+                          <p>Provide the full server-side path to the dataset folder.</p>
+                          <input
+                              type="text"
+                              className="folder-path-input"
+                              placeholder="/path/on/server/to/dataset"
+                              value={sourceFolderPath}
+                              onChange={(e) => setSourceFolderPath(e.target.value)}
+                          />
+                        </div>
+                        <div className="action-area">
+                          <button className="run-pipeline-button" onClick={handleRunPipeline} disabled={!canRun}>
+                            {isLoading ? 'Processing...' : 'Run Verification Pipeline'}
+                          </button>
+                          <p className="pipeline-status-message">{!isLoading && pipelineStatus}</p>
+                        </div>
+                      </section>
                   )}
-                </main>
-              </section>
-            </div>
-          )}
-          {/* --- END OF CONDITIONAL WORKFLOW RENDERING --- */}
-          
+
+                  {isJobComplete && results.length > 0 && (
+                      <div className="bulk-action-area">
+                        <p>{pipelineStatus}</p>
+                        <button className="save-all-button" onClick={handleBulkSave} disabled={isSaving}>
+                          {isSaving ? 'Saving...' : `Save All ${results.length} Verified Records`}
+                        </button>
+                      </div>
+                  )}
+
+                  <section className="results-section">
+                    <main>
+                      {results.length > 0 ? (
+                          <DetailedTableView data={results} expandedRowId={expandedRowId} setExpandedRowId={setExpandedRowId} />
+                      ) : (
+                          !isLoading && <p style={{color: 'var(--text-muted, #6b7280)', padding: '2rem', textAlign: 'center'}}>Run a pipeline to see results here.</p>
+                      )}
+                    </main>
+                  </section>
+                </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 
-export default VerificationCenter;
+export default VerificationCenter;;
