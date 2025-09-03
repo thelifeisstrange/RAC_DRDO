@@ -6,7 +6,7 @@ from django.conf import settings
 
 # from localrun.pipeline.workers.scanner_worker import scan_for_gate_scorecards
 
-from .models import VerificationJob, VerificationResult# Use the simple Result model
+from .models import VerificationJob, VerificationResult, ParsedResult # Use the simple Result model
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
 from .workers.local_extract_worker import extract_and_parse, extract_single_field
@@ -122,11 +122,12 @@ def run_verification_pipeline(job_id, master_csv_path, source_folder_path):
             result_dict = {k: ("" if v is None or str(v) == "nan" else str(v)) for k, v in result_dict.items()}
 
             VerificationResult.objects.create(job=job, data=result_dict)
+            save_verification_result(result_dict)
             # save_verification_result(result_dict)
             print(f"[CELERY TASK] Saved result for {file_name} to database.")
 
         job.status = 'COMPLETE'
-        job.details = f"Successfully processed {len(source_file_paths)} documents."
+        job.details = f"Successfully processed the documents."
         job.save()
 
     except Exception as e:
@@ -138,47 +139,45 @@ def run_verification_pipeline(job_id, master_csv_path, source_folder_path):
         if os.path.exists(temp_compress_dir):
             shutil.rmtree(temp_compress_dir)
 
-# def save_verification_result(json_result):
-#     """
-#     Takes the JSON result (dict) and saves into VerificationResult table.
-#     """
-#     obj, created = ParsedResult.objects.update_or_create(
-#         id=json_result.get("id"),
-#         defaults={
-#             "email": json_result.get("email"),
-#             "phone": json_result.get("phone"),
+def save_verification_result(json_result):
+    """
+    Takes the JSON result (dict) and saves into VerificationResult table.
+    """
+    obj, created = ParsedResult.objects.update_or_create(
+        id=json_result.get("id"),
+        defaults={
 
-#             "input_name": json_result.get("input_name"),
-#             "extracted_name": json_result.get("extracted_name"),
-#             "name_status": json_result.get("name_status"),
+            "input_name": json_result.get("input_name"),
+            "extracted_name": json_result.get("extracted_name"),
+            "name_status": json_result.get("name_status"),
 
-#             "input_father_name": json_result.get("input_father_name"),
-#             "extracted_father_name": json_result.get("extracted_father_name"),
-#             "father_name_status": json_result.get("father_name_status"),
+            "input_father_name": json_result.get("input_father_name"),
+            "extracted_father_name": json_result.get("extracted_father_name"),
+            "father_name_status": json_result.get("father_name_status"),
 
-#             "input_reg_id": json_result.get("input_reg_id"),
-#             "extracted_reg_id": json_result.get("extracted_reg_id"),
-#             "reg_id_status": json_result.get("reg_id_status"),
+            "input_reg_id": json_result.get("input_reg_id"),
+            "extracted_reg_id": json_result.get("extracted_reg_id"),
+            "reg_id_status": json_result.get("reg_id_status"),
 
-#             "input_year": json_result.get("input_year"),
-#             "extracted_year": json_result.get("extracted_year"),
-#             "year_status": json_result.get("year_status"),
+            "input_year": json_result.get("input_year"),
+            "extracted_year": json_result.get("extracted_year"),
+            "year_status": json_result.get("year_status"),
 
-#             "input_paper_code": json_result.get("input_paper_code"),
-#             "extracted_paper_code": json_result.get("extracted_paper_code"),
-#             "paper_code_status": json_result.get("paper_code_status"),
+            "input_paper_code": json_result.get("input_paper_code"),
+            "extracted_paper_code": json_result.get("extracted_paper_code"),
+            "paper_code_status": json_result.get("paper_code_status"),
 
-#             "input_score": json_result.get("input_score"),
-#             "extracted_score": json_result.get("extracted_score"),
-#             "score_status": json_result.get("score_status"),
+            "input_score": json_result.get("input_score"),
+            "extracted_score": json_result.get("extracted_score"),
+            "score_status": json_result.get("score_status"),
 
-#             "input_scoreof100": json_result.get("input_scoreof100"),
-#             "extracted_scoreof100": json_result.get("extracted_scoreof100"),
-#             "scoreof100_status": json_result.get("scoreof100_status"),
+            "input_scoreof100": json_result.get("input_scoreof100"),
+            "extracted_scoreof100": json_result.get("extracted_scoreof100"),
+            "scoreof100_status": json_result.get("scoreof100_status"),
 
-#             "input_rank": json_result.get("input_rank"),
-#             "extracted_rank": json_result.get("extracted_rank"),
-#             "rank_status": json_result.get("rank_status"),
-#         }
-#     )
-#     return obj
+            "input_rank": json_result.get("input_rank"),
+            "extracted_rank": json_result.get("extracted_rank"),
+            "rank_status": json_result.get("rank_status"),
+        }
+    )
+    return obj

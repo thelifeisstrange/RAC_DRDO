@@ -27,44 +27,44 @@ class VerificationResult(models.Model):
     def __str__(self):
         return f"Result for Job {self.job.id} - ID {self.data.get('id', 'N/A')}"
     
-# class ParsedResult(models.Model):
-#     id = models.CharField(max_length=50, primary_key=True)   # file/student id
-#     email = models.CharField(max_length=255, null=True, blank=True)
-#     phone = models.CharField(max_length=50, null=True, blank=True)
+class ParsedResult(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)   # file/student id
+    # email = models.CharField(max_length=255, null=True, blank=True)
+    # phone = models.CharField(max_length=50, null=True, blank=True)
 
-#     input_name = models.TextField(null=True, blank=True)
-#     extracted_name = models.TextField(null=True, blank=True)
-#     name_status = models.CharField(max_length=10, null=True, blank=True)
+    input_name = models.TextField(null=True, blank=True)
+    extracted_name = models.TextField(null=True, blank=True)
+    name_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_father_name = models.TextField(null=True, blank=True)
-#     extracted_father_name = models.TextField(null=True, blank=True)
-#     father_name_status = models.CharField(max_length=10, null=True, blank=True)
+    input_father_name = models.TextField(null=True, blank=True)
+    extracted_father_name = models.TextField(null=True, blank=True)
+    father_name_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_reg_id = models.CharField(max_length=100, null=True, blank=True)
-#     extracted_reg_id = models.CharField(max_length=100, null=True, blank=True)
-#     reg_id_status = models.CharField(max_length=10, null=True, blank=True)
+    input_reg_id = models.CharField(max_length=100, null=True, blank=True)
+    extracted_reg_id = models.CharField(max_length=100, null=True, blank=True)
+    reg_id_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_year = models.CharField(max_length=10, null=True, blank=True)
-#     extracted_year = models.CharField(max_length=10, null=True, blank=True)
-#     year_status = models.CharField(max_length=10, null=True, blank=True)
+    input_year = models.CharField(max_length=10, null=True, blank=True)
+    extracted_year = models.CharField(max_length=10, null=True, blank=True)
+    year_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_paper_code = models.CharField(max_length=50, null=True, blank=True)
-#     extracted_paper_code = models.CharField(max_length=50, null=True, blank=True)
-#     paper_code_status = models.CharField(max_length=10, null=True, blank=True)
+    input_paper_code = models.CharField(max_length=50, null=True, blank=True)
+    extracted_paper_code = models.CharField(max_length=50, null=True, blank=True)
+    paper_code_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_score = models.CharField(max_length=50, null=True, blank=True)
-#     extracted_score = models.CharField(max_length=50, null=True, blank=True)
-#     score_status = models.CharField(max_length=10, null=True, blank=True)
+    input_score = models.CharField(max_length=50, null=True, blank=True)
+    extracted_score = models.CharField(max_length=50, null=True, blank=True)
+    score_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_scoreof100 = models.CharField(max_length=50, null=True, blank=True)
-#     extracted_scoreof100 = models.CharField(max_length=50, null=True, blank=True)
-#     scoreof100_status = models.CharField(max_length=10, null=True, blank=True)
+    input_scoreof100 = models.CharField(max_length=50, null=True, blank=True)
+    extracted_scoreof100 = models.CharField(max_length=50, null=True, blank=True)
+    scoreof100_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     input_rank = models.CharField(max_length=50, null=True, blank=True)
-#     extracted_rank = models.CharField(max_length=50, null=True, blank=True)
-#     rank_status = models.CharField(max_length=10, null=True, blank=True)
+    input_rank = models.CharField(max_length=50, null=True, blank=True)
+    extracted_rank = models.CharField(max_length=50, null=True, blank=True)
+    rank_status = models.CharField(max_length=10, null=True, blank=True)
 
-#     created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"ParsedResult({self.id})"
+    def __str__(self):
+        return f"ParsedResult({self.id})"

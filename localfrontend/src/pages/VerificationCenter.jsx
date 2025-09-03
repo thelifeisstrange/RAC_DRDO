@@ -177,41 +177,41 @@ const VerificationCenter = () => {
     }
   };
 
-  const handleBulkSave = async () => {
-    if (results.length === 0 || !advertisement) return;
-    setIsSaving(true);
-    setPipelineStatus("Saving all results to the database...");
+  // const handleBulkSave = async () => {
+  //   if (results.length === 0 || !advertisement) return;
+  //   setIsSaving(true);
+  //   setPipelineStatus("Saving all results to the database...");
 
-    const payloadData = results.map(res => {
-      const flatData = { applicant_id: res.id };
-      const fieldsToFlatten = ['name', 'father_name', 'registration_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
+  //   const payloadData = results.map(res => {
+  //     const flatData = { applicant_id: res.id };
+  //     const fieldsToFlatten = ['name', 'father_name', 'registration_id', 'year', 'paper_code', 'score', 'scoreof100', 'rank'];
 
-      fieldsToFlatten.forEach(field => {
-        if (res[field]) {
-          const backendKey = field === 'registration_id' ? 'reg_id' : field;
-          flatData[`input_${backendKey}`] = res[field].input;
-          flatData[`extracted_${backendKey}`] = res[field].extracted;
-          flatData[`${backendKey}_status`] = String(res[field].status);
-        }
-      });
-      return flatData;
-    });
+  //     fieldsToFlatten.forEach(field => {
+  //       if (res[field]) {
+  //         const backendKey = field === 'registration_id' ? 'reg_id' : field;
+  //         flatData[`input_${backendKey}`] = res[field].input;
+  //         flatData[`extracted_${backendKey}`] = res[field].extracted;
+  //         flatData[`${backendKey}_status`] = String(res[field].status);
+  //       }
+  //     });
+  //     return flatData;
+  //   });
 
-    try {
-      const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, {
-        results: payloadData,
-        advertisement_id: advertisement.id
-      });
-      setPipelineStatus(`✅ ${response.data.status}`);
-      toast.success(response.data.status);
-    } catch (error) {
-      console.error("Failed to save results:", error.response?.data || error);
-      setPipelineStatus("❌ Error saving results. Check the console.");
-      toast.error("Error: Could not save results.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  //   try {
+  //     const response = await axios.post(`${ADVERTISEMENT_API_URL}/save-results/`, {
+  //       results: payloadData,
+  //       advertisement_id: advertisement.id
+  //     });
+  //     setPipelineStatus(`✅ ${response.data.status}`);
+  //     toast.success(response.data.status);
+  //   } catch (error) {
+  //     console.error("Failed to save results:", error.response?.data || error);
+  //     setPipelineStatus("❌ Error saving results. Check the console.");
+  //     toast.error("Error: Could not save results.");
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
 
   useEffect(() => {
     return () => {
@@ -276,14 +276,14 @@ const VerificationCenter = () => {
                       </section>
                   )}
 
-                  {isJobComplete && results.length > 0 && (
+                  {/* {isJobComplete && results.length > 0 && (
                       <div className="bulk-action-area">
                         <p>{pipelineStatus}</p>
                         <button className="save-all-button" onClick={handleBulkSave} disabled={isSaving}>
                           {isSaving ? 'Saving...' : `Save All ${results.length} Verified Records`}
                         </button>
                       </div>
-                  )}
+                  )} */}
 
                   <section className="results-section">
                     <main>
