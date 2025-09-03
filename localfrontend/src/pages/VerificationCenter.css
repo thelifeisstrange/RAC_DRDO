@@ -1,4 +1,3 @@
-/* --- BASE LAYOUT --- */
 .verification-center-wrapper .dashboard-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -20,7 +19,6 @@
   color: var(--color-text-heading);
 }
 
-/* --- TABS --- */
 .verification-center-wrapper .view-tabs {
   display: flex;
   gap: 0.5rem;
@@ -55,12 +53,10 @@
   outline-offset: 2px;
 }
 
-/* --- UPLOAD WORKFLOW CONTAINER --- */
 .verification-center-wrapper .upload-workflow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
   padding: 2rem;
   margin-bottom: 2.5rem;
   background-color: var(--color-bg-card);
@@ -86,7 +82,6 @@
 }
 
 .verification-center-wrapper .action-area {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -127,8 +122,10 @@
   font-size: 0.875rem;
 }
 
-/* --- FILE UPLOAD ZONE --- */
+/* --- FILE UPLOAD ZONE (MODIFIED) --- */
 .verification-center-wrapper .file-upload-zone {
+  max-width: 500px; /* Prevents stretching */
+  margin: 0 auto; /* Centers the box horizontally */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -215,7 +212,7 @@
 .folder-path-input {
   box-sizing: border-box;
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   background-color: var(--color-bg-main);
@@ -231,7 +228,6 @@
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
-/* --- LOADING STATE --- */
 .verification-center-wrapper .loading-state-container {
   box-sizing: border-box;
   display: flex;
@@ -452,7 +448,6 @@
   font-weight: 600;
 }
 
-/* --- EXPANDED DETAIL VIEW --- */
 .verification-center-wrapper .detail-row-container td {
   padding: 0;
 }
@@ -550,7 +545,6 @@
   font-weight: 700;
 }
 
-/* --- DETAIL ACTIONS & BULK ACTIONS --- */
 .detail-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -638,7 +632,6 @@
   cursor: not-allowed;
 }
 
-/* --- ADVERTISEMENT SELECTOR --- */
 .advertisement-selector-wrapper {
   max-width: 800px;
   margin: 2rem auto;
@@ -745,11 +738,12 @@
   font-size: 0.875rem;
 }
 
-/* --- VERIFICATION CONTAINER (WHEN AD IS SELECTED) --- */
 .verification-container .dashboard-header {
-  padding-bottom: 0;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 1.5rem 2rem;
   margin-bottom: 1.5rem;
-  border-bottom: none;
 }
 
 .verification-container h2 {
