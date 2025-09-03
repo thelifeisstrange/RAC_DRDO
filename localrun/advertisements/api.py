@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Advertisement
-# Import the powerful worker functions we just created
 from .table_manager import create_results_table_for_advertisement, save_results_to_table
 
 class AdvertisementAPIView(APIView):
@@ -14,9 +13,7 @@ class AdvertisementAPIView(APIView):
     This is the first endpoint the frontend will call.
     """
     def get(self, request, *args, **kwargs):
-        # Fetch all ads from the database
         ads = Advertisement.objects.all().order_by('-created_at')
-        # Serialize them into a simple list of dictionaries for the frontend
         data = [{'id': ad.id, 'name': ad.name} for ad in ads]
         return Response(data)
 
@@ -29,7 +26,6 @@ class AdvertisementAPIView(APIView):
         if not name:
             return Response({'error': 'Advertisement name is required.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Use get_or_create to prevent creating duplicate ads with the same name
         ad, created = Advertisement.objects.get_or_create(name=name)
         
         if created:
@@ -93,15 +89,12 @@ class BulkSaveResultsAPIView(APIView):
         except Advertisement.DoesNotExist:
             return Response({'error': 'Advertisement not found.'}, status=404)
 
-        # --- THE NEW ORCHESTRATION LOGIC ---
         table_name = advertisement.get_results_table_name()
         
-        # Step 1: Create the dynamic table for this advertisement
         table_created, error = create_results_table_for_advertisement(table_name)
         if not table_created:
             return Response({'error': f'Database error: {error}'}, status=500)
             
-        # Step 2: Save the data to the newly created table
         saved_count, errors = save_results_to_table(table_name, results_list)
         
         if errors:

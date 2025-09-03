@@ -1,16 +1,13 @@
-# localrun/pipeline/workers/verify_worker.py
 import os
 import string
 import pandas as pd
 
-# --- THE CRITICAL CHANGE: The function now accepts applicant_id directly ---
 def verify_and_create_row(master_df, applicant_id, extracted_data_dict):
     """
     Verifies a single file's data and creates a flat list for the final report.
     It now receives the applicant_id directly instead of parsing it from a filename.
     """
     
-    # We no longer need to parse the ID. We use the one passed in.
     file_id = str(applicant_id)
 
     if file_id not in master_df.index:

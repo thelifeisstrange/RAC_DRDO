@@ -6,7 +6,6 @@ import mimetypes
 # Removed unused imports: requests, json
 from together import Together
 
-# --- CHANGE 1: Initialize client to None at the module level ---
 client = None
 
 def initialize_client():

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import VerificationJob, VerificationResult # Use the simple models
+from .models import VerificationJob, VerificationResult 
 from .tasks import run_verification_pipeline
 from .serializers import VerificationJobSerializer
 
@@ -21,7 +21,7 @@ class StartVerificationAPIView(APIView):
         if not master_csv or not source_folder_path:
             return Response({'error': 'Master CSV and source folder path are required.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        allowed_base_path = os.path.abspath('/data') # Example: allows '.../media/../datasets'
+        allowed_base_path = os.path.abspath('/data') 
         user_path = os.path.abspath(source_folder_path)
 
         if not user_path.startswith(allowed_base_path):
@@ -35,19 +35,11 @@ class StartVerificationAPIView(APIView):
         upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads', str(job.id))
         os.makedirs(upload_dir, exist_ok=True)
         
-        # We need to pass the full path to the task
         master_csv_path = os.path.join(upload_dir, master_csv.name)
         with open(master_csv_path, 'wb+') as f:
             for chunk in master_csv.chunks(): f.write(chunk)
 
-        # source_file_paths = []
-        # for f in source_files:
-        #     path = os.path.join(upload_dir, f.name)
-        #     with open(path, 'wb+') as destination:
-        #         for chunk in f.chunks(): destination.write(chunk)
-        #     source_file_paths.append(path)
-        
-        # Call the task with all the necessary paths
+
         run_verification_pipeline.delay(job.id, master_csv_path, source_folder_path)
 
         serializer = VerificationJobSerializer(job)

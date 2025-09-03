@@ -11,17 +11,11 @@ services:
     ports:
       - "3307:3306"
     
-    # --- START OF THE CRITICAL FIX ---
     environment:
-      # Use the correct variable to set the root user's password.
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      
-      # These two variables will now be used to create a separate,
-      # non-root user that your Django application will connect with. This is a best practice.
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-    # --- END OF THE CRITICAL FIX ---
       
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
@@ -30,14 +24,13 @@ services:
 
   # The Redis service
   redis:
-    image: redis:6.2-alpine # Use a specific, lightweight version of Redis
+    image: redis:6.2-alpine 
     container_name: verification_redis
     ports:
       - "6379:6379" # Map the container's port 6379 to your host machine's port 6379
     volumes:
-      - redis_data:/data # Persist Redis data across restarts
+      - redis_data:/data 
 
-  # The Django Web Server service (Daphne or runserver)
   web:
     build: . # Build the image from the Dockerfile in the current directory
     container_name: verification_web
@@ -49,23 +42,22 @@ services:
     ports:
       - "8000:8000" # Map container port 8000 to host port 8000
     env_file:
-      - .env # Pass environment variables from your .env file
+      - .env 
     depends_on:
-      - redis # Tell Docker to start the Redis service before this one
+      - redis 
 
-  # The Celery Worker service
   celery:
-    build: . # Build from the exact same Dockerfile as the web service
+    build: . 
     container_name: verification_celery
-    command: celery -A localrun worker -l info # The command to start the worker
+    command: celery -A localrun worker -l info
     volumes:
-      - .:/app # Mount local code for live-reloading
+      - .:/app 
       - media_volume:/app/media 
       - ../docker_data:/data
     env_file:
-      - .env # Pass the same environment variables
+      - .env 
     depends_on:
-      - redis # Also depends on Redis
+      - redis 
 
 volumes:
   mysql_data:

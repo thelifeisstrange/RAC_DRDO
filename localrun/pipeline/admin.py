@@ -5,7 +5,6 @@ from .models import VerificationJob, VerificationResult
 
 @admin.register(VerificationJob)
 class VerificationJobAdmin(admin.ModelAdmin):
-    # 'report_file_path' has been removed from the display list.
     list_display = ('id', 'status', 'created_at', 'updated_at', 'details')
     list_filter = ('status',)
     readonly_fields = ('created_at', 'updated_at')

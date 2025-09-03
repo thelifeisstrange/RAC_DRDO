@@ -4,14 +4,12 @@ import shutil
 from celery import shared_task
 from django.conf import settings
 
-# from localrun.pipeline.workers.scanner_worker import scan_for_gate_scorecards
-
-from .models import VerificationJob, VerificationResult, ParsedResult # Use the simple Result model
+from .models import VerificationJob, VerificationResult, ParsedResult 
 from .workers.load_csv_worker import load_and_prepare_csv
 from .workers.compress_worker import process_and_compress
 from .workers.local_extract_worker import extract_and_parse, extract_single_field
 # from .workers.extract_worker import extract_and_parse, extract_single_field, initialize_client
-from .workers.verify_worker import verify_and_create_row # Use the simple verify function
+from .workers.verify_worker import verify_and_create_row 
 from .workers.derive_worker import derive_paper_code
 from .workers.scanner_worker import scan_for_gate_scorecards
 from .workers.orientation_worker import correct_orientation_in_place
@@ -72,13 +70,10 @@ def run_verification_pipeline(job_id, master_csv_path, source_folder_path):
 
         for applicant_id, file_path in files_to_process.items():
             file_name = os.path.basename(file_path)
-            # --- START OF THE FIX ---
-            # We now capture the second return value into a variable named 'compress_msg'
+
             compressed_path, compress_msg = process_and_compress(file_path, temp_compress_dir, poppler_path=settings.POPPLER_PATH)
             
-            # And we print it to the log!
             print(f"[COMPRESS WORKER] Compress status for {file_name}: {compress_msg}")
-            # --- END OF THE FIX ---
             
             if not compressed_path:
                 result_row_list = [file_name.split('_')[0], 'COMPRESSION_FAILED', 'False'] + [''] * (len(final_headers) - 3)

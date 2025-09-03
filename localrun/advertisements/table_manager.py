@@ -2,7 +2,7 @@
 
 from django.db import connection
 from django.utils import timezone
-from .dynamic_models import PARSED_RESULT_FIELDS_BLUEPRINT # We will create this next
+from .dynamic_models import PARSED_RESULT_FIELDS_BLUEPRINT 
 
 def create_results_table_for_advertisement(table_name: str):
     """
@@ -39,7 +39,6 @@ def save_results_to_table(table_name: str, results_list: list):
     for result in results_list:
         result['created_at'] = now
     
-    # Prepare data rows as tuples, ensuring the order matches column_names
     rows_to_insert = [
         tuple(result.get(col) for col in column_names)
         for result in results_list
@@ -48,7 +47,6 @@ def save_results_to_table(table_name: str, results_list: list):
     columns_sql = ", ".join([f'`{col}`' for col in column_names])
     placeholders_sql = ", ".join(["%s"] * len(column_names))
 
-    # Using ON DUPLICATE KEY UPDATE for MySQL (UPSERT)
     update_sql = ", ".join([f'`{col}`=VALUES(`{col}`)' for col in column_names if col != 'id'])
     insert_query = f"""
         INSERT INTO `{table_name}` ({columns_sql}) VALUES ({placeholders_sql})

@@ -5,27 +5,51 @@ import base64
 import mimetypes
 import requests
 import json
+import time
 
 def extract_and_parse(image_path, prompt, expected_columns):
     """
-    Extracts data from an image by calling the local llama-server,
-    then parses the response.
+    Extracts data from an image by calling the local llama-server.
+    If a PARSE_ERROR occurs, it will automatically retry up to 2 more times (3 total attempts).
     """
-    raw_response = _extract_data_from_local_model(image_path, prompt)
+    # --- START OF NEW RETRY LOGIC ---
+    max_attempts = 3
+    for attempt in range(max_attempts):
+        print(f"[EXTRACT WORKER] Attempt {attempt + 1}/{max_attempts} for: {os.path.basename(image_path)}")
+        
+        # Call the underlying extraction function
+        raw_response = _extract_data_from_local_model(image_path, prompt)
 
-    if raw_response.startswith("ERROR:"):
-        return [f"API_OR_FILE_ERROR: {raw_response}"] + [''] * (expected_columns - 1)
+        # Check for network or catastrophic API errors first. These should not be retried.
+        if raw_response.startswith("ERROR:"):
+            return [f"API_OR_FILE_ERROR: {raw_response}"] + [''] * (expected_columns - 1)
 
-    # Clean up potential markdown or extra text from the model's response
-    cleaned_response = raw_response.replace('*', '').replace('`', '').strip()
+        # Clean up potential markdown, backticks, and other common LLM artifacts
+        cleaned_response = raw_response.replace('*', '').replace('`', '').strip()
+        
+        # Parse the cleaned response
+        parsed_values = [value.strip() for value in cleaned_response.split(',')]
 
-    parsed_values = [value.strip() for value in cleaned_response.split(',')]
+        # Check if parsing was successful
+        if len(parsed_values) == expected_columns:
+            print(f"[EXTRACT WORKER] Success on attempt {attempt + 1}.")
+            return parsed_values # If successful, exit the loop and return the data
+        
+        # If parsing failed, log it and prepare for the next attempt
+        print(f"[EXTRACT WORKER] WARNING: Parse error on attempt {attempt + 1}. Expected {expected_columns}, got {len(parsed_values)}. Raw: '{raw_response}'")
+        
+        # If this wasn't the last attempt, wait a moment before retrying
+        if attempt < max_attempts - 1:
+            print("[EXTRACT WORKER] Waiting 1 second before retrying...")
+            time.sleep(1)
 
-    if len(parsed_values) == expected_columns:
-        return parsed_values
-    else:
-        error_msg = f"PARSE_ERROR: Expected {expected_columns}, got {len(parsed_values)}. Raw: '{raw_response}'"
-        return [error_msg] + [''] * (expected_columns - 1)
+    # --- END OF NEW RETRY LOGIC ---
+
+    # If the loop finishes without a successful return, it means all attempts failed.
+    # We construct the final error message from the last attempt's data.
+    print(f"[EXTRACT WORKER] All {max_attempts} attempts failed. Returning final parse error.")
+    final_error_msg = f"PARSE_ERROR: After {max_attempts} attempts, still failed. Expected {expected_columns}, got {len(parsed_values)}. Last Raw Response: '{raw_response}'"
+    return [final_error_msg] + [''] * (expected_columns - 1)
 
 
 def _encode_image_to_base64_uri(file_path):

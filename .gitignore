@@ -2,6 +2,9 @@ assets/compressed_documents/
 .idea
 dump.rdb
 
+*.env
+
+
 
 # Ignore IDE/editor-specific files
 .vscode/

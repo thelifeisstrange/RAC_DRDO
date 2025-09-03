@@ -1,4 +1,3 @@
-# localrun/pipeline/workers/compress_worker.py
 
 import os
 import io
@@ -42,7 +41,7 @@ def _compress_image_object(image_obj, base_name, destination_folder, target_size
     best_effort_buffer = None
     best_effort_size_kb = float('inf')
 
-    # --- CRITICAL: JPEG does not support transparency (RGBA). Convert to RGB. ---
+    #JPEG does not support transparency (RGBA). Convert to RGB. ---
     if image_obj.mode == 'RGBA':
         image_obj = image_obj.convert('RGB')
 

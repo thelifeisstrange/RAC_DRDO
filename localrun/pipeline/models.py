@@ -29,8 +29,6 @@ class VerificationResult(models.Model):
     
 class ParsedResult(models.Model):
     id = models.CharField(max_length=50, primary_key=True)   # file/student id
-    # email = models.CharField(max_length=255, null=True, blank=True)
-    # phone = models.CharField(max_length=50, null=True, blank=True)
 
     input_name = models.TextField(null=True, blank=True)
     extracted_name = models.TextField(null=True, blank=True)

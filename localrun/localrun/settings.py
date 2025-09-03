@@ -55,11 +55,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders', # Moved here for clarity, still high up
+    'corsheaders', 
     'rest_framework',
     'django_celery_results',
     'pipeline', 
-    'advertisements', # Your local app
+    'advertisements', 
 ]
 
 MIDDLEWARE = [
@@ -103,7 +103,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'), # This will be 'db' from the .env file
+        'HOST': os.getenv('DB_HOST'), 
         'PORT': os.getenv('DB_PORT'),
     }
 }

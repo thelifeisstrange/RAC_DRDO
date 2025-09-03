@@ -1,8 +1,3 @@
-# advertisements/dynamic_models.py
-
-# This dictionary is the blueprint for our dynamically created result tables.
-# The keys are the column names, and the values are their SQL data types.
-# This structure is based on the ParsedResult model you defined.
 PARSED_RESULT_FIELDS_BLUEPRINT = {
     "id": "VARCHAR(50) PRIMARY KEY",
     "input_name": "TEXT",
