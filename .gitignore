@@ -3,6 +3,7 @@ assets/compressed_documents/
 dump.rdb
 
 *.env
+.env.*
 
 
 
