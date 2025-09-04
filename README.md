@@ -53,6 +53,7 @@ The application is composed of three main, independent parts that communicate ov
 -   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for macOS or Windows)
 -   [Node.js](https://nodejs.org/en) (v18 or newer) and `npm`
 -   A local copy of the Gemma 3 Vision model files (see Model Setup section).
+- [Poppler](https://github.com/oschwartz10612/poppler-windows/releases/tag/v25.07.0-0)
 
 ### Backend Setup (Docker)
 
@@ -70,7 +71,7 @@ The entire backend is managed by Docker Compose, making setup incredibly simple.
         *   `SECRET_KEY`: Generate a new Django secret key.
         *   `DEBUG`: Set to `True` for development.
         *   **Database Credentials:** Set `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and `DB_ROOT_PASSWORD`.
-        *   **Poppler Path (if processing PDFs):** Provide the path to your Poppler `bin` directory *as the container will see it*. If using the provided `Dockerfile`, this is not necessary unless you add Poppler to the image.
+        *   **Poppler Path (if processing PDFs):** Provide the path to your Poppler `bin` directory 
 
 3.  **Build and Start the Services:**
     This single command will build the custom Docker image, download Redis and MySQL, and start all backend services.
@@ -235,7 +236,9 @@ cmake --build build --config Release
 
 You need two files for Gemma-3-Vision-Latex: the main model weights and the separate projector file.
 
-*   **Gemma-3-Vision-Latex.Q3_K_S:** [Gemma-3-Vision-Latex.Q3_K_S.gguf](https://huggingface.co/mradermacher/Gemma-3-Vision-Latex-GGUF/resolve/main/Gemma-3-Vision-Latex.Q3_K_S.gguf)
+[text](https://huggingface.co/mradermacher/Gemma-3-Vision-Latex-GGUF#provided-quants)
+
+*   **Gemma-3-Vision-Latex.Q4_K_S:** [Gemma-3-Vision-Latex.Q4_K_S.gguf](https://huggingface.co/mradermacher/Gemma-3-Vision-Latex-GGUF/resolve/main/Gemma-3-Vision-Latex.Q4_K_S.gguf)
 *   **MM Projector:** [Gemma-3-Vision-Latex.mmproj-f16.gguf](https://huggingface.co/mradermacher/Gemma-3-Vision-Latex-GGUF/resolve/main/Gemma-3-Vision-Latex.mmproj-f16.gguf)
 
 Download both and place them in a convenient folder, for example `C:\models\`.
@@ -251,7 +254,7 @@ Your compiled executable is located in `build\bin\Release`. You can now run the 
 cd build\bin\Release
 
 # Run the server, pointing to your models
-.\llama-server.exe --model C:\models\Gemma-3-Vision-Latex.Q3_K_S.gguf --mmproj C:\models\Gemma-3-Vision-Latex.mmproj-f16.gguf --n-gpu-layers 35
+.\llama-server.exe --model C:\models\Gemma-3-Vision-Latex.Q4_K_S.gguf --mmproj C:\models\Gemma-3-Vision-Latex.mmproj-f16.gguf --n-gpu-layers 35
 ```
 
 *   `--n-gpu-layers 35`: This offloads 35 layers to the GPU. You can adjust this number based on your GPU's VRAM.
